@@ -35,11 +35,11 @@ Task-level tracking for the features in `docs/FEATURES.md`. Rules:
 
 ## F-02 · Mood wizard UI
 
-- [ ] `src/config/steps.ts` tree + types (6 genres, horror sub-branches, shared era/pacing)
-- [ ] StepCard / OptionGrid / ProgressDots components (mobile-first, 44px+ targets)
-- [ ] Back navigation + framer-motion slide transitions
-- [ ] Wizard state hook producing typed `WizardAnswers`
-- [ ] Desktop layout: centered max-w-md column
+- [x] `src/config/steps.ts` tree + types (6 genres, horror sub-branches, shared era/pacing)
+- [x] StepCard / OptionGrid / ProgressDots components (mobile-first, 44px+ targets)
+- [ ] Back navigation + framer-motion slide transitions <!-- built; awaiting in-browser check -->
+- [x] Wizard state hook producing typed `WizardAnswers`
+- [x] Desktop layout: centered max-w-md column
 - [ ] **Acceptance** (FEATURES F-02)
 
 ## F-03 · LLM provider abstraction
