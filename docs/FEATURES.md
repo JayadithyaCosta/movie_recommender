@@ -19,8 +19,8 @@ Data-driven step tree in `src/config/steps.ts` (Horror w/ 4 sub-branches, Sci-Fi
 ## F-03 · LLM provider abstraction
 
 **Phase 2 · Depends on: F-01 · Spec: PROMPTS.md**
-`src/lib/llm/` — `index.ts` public API + `anthropic.ts`/`openai.ts`, selected by `LLM_PROVIDER`. JSON-only, zod-validated, one reinforced retry on parse failure, `max_tokens ≤ 600`, static system block positioned for prompt caching.
-**Done when:** `getCandidates(prompt)` returns validated candidates from either provider by flipping only env vars.
+`src/lib/llm/` — `index.ts` public API + `gemini.ts`/`anthropic.ts`/`openai.ts`, selected by `LLM_PROVIDER`. JSON-only, zod-validated, one reinforced retry on parse failure, `max_tokens ≤ 600`, static system block positioned for prompt caching. Gemini is the default (free tier) and should constrain output with a response schema rather than relying on prompt wording alone.
+**Done when:** `getCandidates(prompt)` returns validated candidates from any configured provider by flipping only env vars.
 
 ## F-04 · TMDB integration & movie cache
 

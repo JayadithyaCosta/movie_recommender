@@ -46,7 +46,8 @@ Task-level tracking for the features in `docs/FEATURES.md`. Rules:
 ## F-03 · LLM provider abstraction
 
 - [ ] `lib/llm/index.ts` public API + provider selection via env
-- [ ] `anthropic.ts` and `openai.ts` implementations
+- [ ] `gemini.ts` implementation (default provider, free tier, schema-constrained JSON)
+- [ ] `anthropic.ts` and `openai.ts` implementations (paid swap path)
 - [ ] zod schemas in `lib/schemas.ts` (RecBatch, RecSingle, TasteSummary)
 - [ ] Reinforced single retry on parse failure; error surfaced per SPEC §7
 - [ ] **Acceptance** (FEATURES F-03)

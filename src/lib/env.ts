@@ -23,14 +23,20 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required (see .env.example)"),
 
   // --- defaulted ---
-  LLM_PROVIDER: z.enum(["anthropic", "openai"]).default("anthropic"),
-  LLM_MODEL: z.string().min(1).default("claude-haiku-4-5"),
+  /**
+   * Defaults to Gemini: it is the only one of the three with a free API tier
+   * (OpenAI has none; Anthropic has none). Anthropic/OpenAI stay selectable for
+   * a paid swap — that is the whole point of the provider abstraction.
+   */
+  LLM_PROVIDER: z.enum(["gemini", "anthropic", "openai"]).default("gemini"),
+  LLM_MODEL: z.string().min(1).default("gemini-3.6-flash"),
   RATE_LIMIT_DISABLED: z
     .enum(["true", "false"])
     .default("false")
     .transform((v) => v === "true"),
 
   // --- optional until their owning feature lands ---
+  GEMINI_API_KEY: optionalSecret, // F-03 — required when LLM_PROVIDER=gemini
   ANTHROPIC_API_KEY: optionalSecret, // F-03
   OPENAI_API_KEY: optionalSecret, // F-03
   TMDB_READ_TOKEN: optionalSecret, // F-04
