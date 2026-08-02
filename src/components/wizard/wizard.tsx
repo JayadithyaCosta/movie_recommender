@@ -2,7 +2,7 @@
 
 import { AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import type { StepTree } from "@/lib/wizard";
 
@@ -16,19 +16,43 @@ type WizardProps = {
 };
 
 export function Wizard({ tree }: WizardProps) {
-  const { state, step, stepNumber, totalSteps, direction, canGoBack, select, back, restart } =
-    useWizard(tree);
+  const {
+    state,
+    step,
+    stepNumber,
+    totalSteps,
+    direction,
+    canGoBack,
+    note,
+    setNote,
+    select,
+    back,
+    restart,
+  } = useWizard(tree);
 
   const isComplete = state.status === "complete";
   const answers = isComplete ? state.answers : null;
 
   // F-05 replaces this with POST /api/recommend; until then, completing the
   // wizard is only observable in the console (PLAN.md Phase 1).
+  const answersRef = useRef(answers);
+  answersRef.current = answers;
+
+  // Keyed on the path, not the answers object — the object identity changes on
+  // every keystroke in the note field, which would spam the console.
+  const completedPath = answers?.readablePath ?? null;
   useEffect(() => {
-    if (answers) {
-      console.log("Wizard answers", answers);
+    if (completedPath) {
+      console.log("Wizard answers", answersRef.current);
     }
-  }, [answers]);
+  }, [completedPath]);
+
+  // Re-log once the note settles, so the note is observable too.
+  const logWithNote = useCallback(() => {
+    if (answersRef.current?.note) {
+      console.log("Wizard answers (with note)", answersRef.current);
+    }
+  }, []);
 
   return (
     <main className="flex flex-1 flex-col px-6 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
@@ -63,7 +87,14 @@ export function Wizard({ tree }: WizardProps) {
         {step ? (
           <StepCard key={step.id} step={step} direction={direction} onSelect={select} />
         ) : answers ? (
-          <WizardSummary key="summary" answers={answers} onRestart={restart} />
+          <WizardSummary
+            key="summary"
+            answers={answers}
+            note={note}
+            onNoteChange={setNote}
+            onNoteCommit={logWithNote}
+            onRestart={restart}
+          />
         ) : null}
       </AnimatePresence>
     </main>

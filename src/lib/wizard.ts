@@ -50,9 +50,29 @@ export type WizardAnswers = {
    * Interpolated as `{answersAsReadablePath}` in Template A (docs/PROMPTS.md).
    */
   readablePath: string;
+  /**
+   * Optional free-text refinement ("nothing with jump scares, under 2 hours").
+   * Absent unless the user typed something.
+   *
+   * Two consequences for F-05: a note must bypass the shared `pathHash` cache
+   * (free text is effectively unique, so a cache hit would serve someone else's
+   * constraints), and it must be interpolated into its own clearly delimited
+   * prompt slot — it is untrusted input and must not be able to restate the
+   * system rules.
+   */
+  note?: string;
 };
 
 export const PATH_SEPARATOR = " > ";
+
+/** Keeps the note from crowding out the prompt budget (`max_tokens` ≤ 600). */
+export const MAX_NOTE_LENGTH = 200;
+
+/** Trims, caps, and treats blank input as "no note". */
+export function normalizeNote(note: string | undefined): string | undefined {
+  const trimmed = note?.trim();
+  return trimmed ? trimmed.slice(0, MAX_NOTE_LENGTH) : undefined;
+}
 
 export function getStep(tree: StepTree, stepId: StepId): WizardStep {
   const step = tree.steps[stepId];
@@ -116,16 +136,23 @@ export function maxDepthFrom(tree: StepTree, stepId: StepId): number {
 }
 
 /** Turn the ordered picks into the object F-05 consumes. */
-export function buildAnswers(tree: StepTree, picks: readonly WizardPick[]): WizardAnswers {
+export function buildAnswers(
+  tree: StepTree,
+  picks: readonly WizardPick[],
+  note?: string,
+): WizardAnswers {
   const steps = picks.map((pick) => ({
     stepId: pick.stepId,
     optionId: pick.optionId,
     label: getOption(tree, pick.stepId, pick.optionId).label,
   }));
 
+  const normalizedNote = normalizeNote(note);
+
   return {
     steps,
     byStep: Object.fromEntries(steps.map((step) => [step.stepId, step.optionId])),
     readablePath: steps.map((step) => step.label).join(PATH_SEPARATOR),
+    ...(normalizedNote ? { note: normalizedNote } : {}),
   };
 }

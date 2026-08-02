@@ -39,6 +39,7 @@ Task-level tracking for the features in `docs/FEATURES.md`. Rules:
 - [x] StepCard / OptionGrid / ProgressDots components (mobile-first, 44px+ targets)
 - [ ] Back navigation + framer-motion slide transitions <!-- built; awaiting in-browser check -->
 - [x] Wizard state hook producing typed `WizardAnswers`
+- [x] Optional free-text note on the summary screen (200 chars, skips shared cache in F-05)
 - [x] Desktop layout: centered max-w-md column
 - [ ] **Acceptance** (FEATURES F-02)
 

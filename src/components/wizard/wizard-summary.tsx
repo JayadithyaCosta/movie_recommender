@@ -1,11 +1,16 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useId } from "react";
 
-import type { WizardAnswers } from "@/lib/wizard";
+import { MAX_NOTE_LENGTH, type WizardAnswers } from "@/lib/wizard";
 
 type WizardSummaryProps = {
   answers: WizardAnswers;
+  note: string;
+  onNoteChange: (note: string) => void;
+  /** Fired when the note settles (blur) — F-05 drops this with the console log. */
+  onNoteCommit: () => void;
   onRestart: () => void;
 };
 
@@ -13,7 +18,15 @@ type WizardSummaryProps = {
  * End of the wizard for F-02. F-05 replaces the disabled CTA with a
  * `POST /api/recommend` call and turns this into the loading state.
  */
-export function WizardSummary({ answers, onRestart }: WizardSummaryProps) {
+export function WizardSummary({
+  answers,
+  note,
+  onNoteChange,
+  onNoteCommit,
+  onRestart,
+}: WizardSummaryProps) {
+  const noteId = useId();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -36,6 +49,25 @@ export function WizardSummary({ answers, onRestart }: WizardSummaryProps) {
           </li>
         ))}
       </ol>
+
+      <div className="space-y-2">
+        <label htmlFor={noteId} className="block text-sm font-medium">
+          Anything else? <span className="font-normal text-muted">(optional)</span>
+        </label>
+        <textarea
+          id={noteId}
+          value={note}
+          onChange={(event) => onNoteChange(event.target.value)}
+          onBlur={onNoteCommit}
+          maxLength={MAX_NOTE_LENGTH}
+          rows={3}
+          placeholder="nothing with jump scares, under 2 hours"
+          className="w-full resize-none rounded-2xl bg-surface px-5 py-4 text-base ring-1 ring-white/5 placeholder:text-muted/60 focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
+        />
+        <p className="text-right text-xs text-muted" aria-live="polite">
+          {note.length}/{MAX_NOTE_LENGTH}
+        </p>
+      </div>
 
       <div className="mt-auto space-y-3">
         <button

@@ -13,7 +13,7 @@ Next.js 15 (App Router, TS strict) + Tailwind + Prisma wired to Postgres, zod-va
 ## F-02 · Mood wizard UI
 
 **Phase 1 · Depends on: F-01 · Spec: SPEC §2.1**
-Data-driven step tree in `src/config/steps.ts` (Horror w/ 4 sub-branches, Sci-Fi, Thriller, Comedy, Drama, Action + shared era/pacing steps). Full-screen cards, tiles, progress dots, back nav, framer-motion, mobile-first 390px.
+Data-driven step tree in `src/config/steps.ts` (Horror w/ 4 sub-branches, Sci-Fi, Thriller, Comedy, Drama, Action + shared era/pacing steps). Full-screen cards, tiles, progress dots, back nav, framer-motion, mobile-first 390px. Summary screen carries an optional 200-char free-text note (SPEC §2.1).
 **Done when:** completing the wizard yields a typed answers object; adding a genre is config-only (zero component edits).
 
 ## F-03 · LLM provider abstraction

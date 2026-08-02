@@ -32,6 +32,9 @@ export type UseWizard = {
   /** +1 forward, -1 backward — drives the slide direction. */
   direction: 1 | -1;
   canGoBack: boolean;
+  /** Raw textarea value; `state.answers.note` holds the normalized version. */
+  note: string;
+  setNote: (note: string) => void;
   select: (optionId: string) => void;
   back: () => void;
   restart: () => void;
@@ -55,6 +58,7 @@ function readDepth(state: unknown): number | null {
 export function useWizard(tree: StepTree): UseWizard {
   const [picks, setPicks] = useState<WizardPick[]>([]);
   const [direction, setDirection] = useState<1 | -1>(1);
+  const [note, setNote] = useState("");
 
   // Mirrors `picks.length` for the popstate handler, which must not re-subscribe
   // on every pick (that would drop events mid-transition).
@@ -119,9 +123,9 @@ export function useWizard(tree: StepTree): UseWizard {
     }
 
     return stepId === null
-      ? { status: "complete", answers: buildAnswers(tree, picks) }
+      ? { status: "complete", answers: buildAnswers(tree, picks, note) }
       : { status: "asking", stepId };
-  }, [tree, picks]);
+  }, [tree, picks, note]);
 
   const step = state.status === "asking" ? getStep(tree, state.stepId) : null;
 
@@ -136,6 +140,8 @@ export function useWizard(tree: StepTree): UseWizard {
     totalSteps,
     direction,
     canGoBack: picks.length > 0,
+    note,
+    setNote,
     select,
     back,
     restart,

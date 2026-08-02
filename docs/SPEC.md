@@ -10,7 +10,8 @@ Users answer a few taps ("what do you feel like right now") OR open a personaliz
 
 - Full-screen step cards from the tree in `src/config/steps.ts`. Each step: question + 2–6 large option tiles. Progress dots on top, back button, framer-motion slide transitions.
 - Branching: e.g. Horror → {Ghosts & hauntings, Demons & possession, Slashers, Psychological}. Every branch converges on 2 shared final steps: **era** (Classics / 90s–00s / Modern / Surprise me) and **pacing** (Slow-burn / Balanced / Intense).
-- Total taps: 3–4. On completion → `POST /api/recommend` → redirect to `/results/[sessionId]`.
+- Total taps: 3–4. The summary screen carries an optional free-text field ("Anything else?", max 200 chars) for constraints the tiles can't express — "nothing with jump scares", "under 2 hours". Empty by default; it never blocks the tap-only path.
+- On completion → `POST /api/recommend` → redirect to `/results/[sessionId]`.
 
 ### 2.2 For You (`/for-you`) — logged in only
 
@@ -22,7 +23,7 @@ Users answer a few taps ("what do you feel like right now") OR open a personaliz
 
 Input: `{ answers?: WizardAnswers, mode: "WIZARD" | "FOR_YOU" }` (userId from session if present).
 
-1. **Cache check (WIZARD + anonymous only):** `pathHash = sha256(normalized answers)`. If a `RecSession` with this hash exists < 7 days old → clone its recommendations into a new session, return. Logged-in wizard calls SKIP the shared cache (results are personalized by taste summary).
+1. **Cache check (WIZARD + anonymous only):** `pathHash = sha256(normalized answers)`. If a `RecSession` with this hash exists < 7 days old → clone its recommendations into a new session, return. Logged-in wizard calls SKIP the shared cache (results are personalized by taste summary). Calls carrying a free-text `note` also SKIP it — the note is effectively unique, so a hash hit would serve someone else's constraints.
 2. **Build prompt** from `docs/PROMPTS.md`:
    - WIZARD anonymous → Template A.
    - WIZARD logged-in → Template A + taste summary block.
