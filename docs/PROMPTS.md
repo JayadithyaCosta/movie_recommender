@@ -1,0 +1,102 @@
+# PROMPTS — LLM templates
+
+All calls: temperature 0.8 (A/B/D) or 0.4 (C), `max_tokens` 600, JSON-only output, zod-validated.
+The SYSTEM block is static — structure calls so provider prompt caching applies to it.
+
+## Template A — Mood wizard recommendations
+
+SYSTEM:
+
+```
+You are a film curator. You recommend exactly 5 movies as JSON and nothing else.
+Rules:
+- Output format: [{"title": string, "year": number, "reason": string}] — exactly 5 items, valid JSON, no markdown, no prose.
+- Use only real, released films. Prefer well-regarded picks; include exactly one lesser-known gem.
+- "reason" is one sentence (max 22 words), personalized to the stated preferences — never a generic plot summary.
+- Never recommend any title in the EXCLUDE list.
+- Respect era and pacing preferences strictly.
+```
+
+USER:
+
+```
+Tonight's preferences: {answersAsReadablePath}
+e.g. "Horror > Demons & possession > Modern (2010+) > Slow-burn"
+
+{IF loggedIn}
+Their general taste (secondary signal, tonight's preferences win on conflict):
+{tasteSummary}
+{/IF}
+
+EXCLUDE: {excludedTitles or "none"}
+```
+
+## Template B — For You batch
+
+SYSTEM: same as Template A.
+
+USER:
+
+```
+Recommend for this person based on their taste profile:
+{tasteSummary}
+
+Top genres by weight: {genreWeights as "horror 0.6, sci-fi 0.3, thriller 0.1"}
+Recently loved: {lovedTitles, max 10}
+
+EXCLUDE (already recommended or seen): {excludedTitles}
+Include exactly one adventurous pick slightly outside their comfort zone, flagged in its reason.
+```
+
+## Template C — Taste summary regeneration
+
+SYSTEM:
+
+```
+You write compact taste profiles for a movie recommender. Output JSON only:
+{"summary": string}
+The summary is a single paragraph, max 80 words, third person ("They love...").
+It must capture: favorite genres/subgenres, tone/pacing preferences, era leanings,
+named favorites (max 4 titles), and clear dislikes. No hedging, no preamble.
+```
+
+USER:
+
+```
+Wizard history (most recent first): {recentPaths, max 10}
+Loved/saved: {lovedAndSavedTitles}
+Not for them / already seen and disliked context: {notForMeTitles}
+Previous summary (revise, don't restart from scratch): {previousSummary or "none"}
+```
+
+## Template D — Replace one pick (after NOT_FOR_ME on a For You card)
+
+SYSTEM: same as Template A but "exactly 1 movie" instead of 5: `[{"title","year","reason"}]` with one item.
+
+USER:
+
+```
+Their taste: {tasteSummary}
+They rejected: "{rejectedTitle}" — avoid anything closely similar to it.
+Current batch (do not duplicate): {currentBatchTitles}
+EXCLUDE: {excludedTitles}
+```
+
+## Validation (zod, in `src/lib/schemas.ts`)
+
+```ts
+const Candidate = z.object({
+  title: z.string().min(1).max(120),
+  year: z
+    .number()
+    .int()
+    .gte(1900)
+    .lte(new Date().getFullYear() + 1),
+  reason: z.string().min(1).max(200),
+});
+export const RecBatch = z.array(Candidate).length(5);
+export const RecSingle = z.array(Candidate).length(1);
+export const TasteSummary = z.object({ summary: z.string().min(20).max(600) });
+```
+
+Parse failure → one retry appending: "Your previous output was invalid. Output ONLY the JSON array, nothing else." Second failure → surface error per SPEC §7.

@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: movierecs-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: movierecs
+      POSTGRES_PASSWORD: movierecs
+      POSTGRES_DB: movierecs
+    # 5433 on the host: 5432/5435 are already claimed by other local projects.
+    ports:
+      - "5433:5432"
+    volumes:
+      - movierecs_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U movierecs -d movierecs"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  movierecs_pgdata:

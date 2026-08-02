@@ -1,0 +1,11 @@
+allowBuilds:
+  # Next.js image optimization
+  sharp: true
+  # native resolver used by eslint-config-next
+  unrs-resolver: true
+  # Prisma engines + client generation
+  "@prisma/client": true
+  "@prisma/engines": true
+  prisma: true
+  # bundler behind tsx (used by `make seed`)
+  esbuild: true

@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+/*
+ * Mobile-first by contract (CLAUDE.md rule 5): every screen is designed at 390px
+ * and desktop is the enhancement. Dark by default — the app is meant to be used
+ * on a couch at night.
+ */
+
+:root {
+  --background: #0b0b0f;
+  --surface: #16161d;
+  --foreground: #f3f3f5;
+  --muted: #9b9ba7;
+  --accent: #f5c518;
+  --accent-foreground: #16161d;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  /* Minimum comfortable tap target — use as `min-h-tap` / `min-w-tap`. */
+  --spacing-tap: 2.75rem;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  /* Wizard steps are full-screen cards; page-level bounce reads as a bug. */
+  overscroll-behavior-y: none;
+}

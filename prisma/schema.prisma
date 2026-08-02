@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Auth.js v5 (Prisma adapter) ----------
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  authSessions  Session[]
+  recSessions   RecSession[]
+  feedback      MovieFeedback[]
+  saved         SavedMovie[]
+  tasteProfile  TasteProfile?
+  createdAt     DateTime  @default(now())
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  @@unique([identifier, token])
+}
+
+// ---------- App domain ----------
+
+enum SessionType {
+  WIZARD
+  FOR_YOU
+}
+
+enum Signal {
+  LOVED
+  SEEN
+  NOT_FOR_ME
+  SAVED
+}
+
+model RecSession {
+  id        String      @id @default(cuid())
+  userId    String?
+  user      User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  type      SessionType @default(WIZARD)
+  answers   Json?       // wizard path; null for FOR_YOU
+  pathHash  String?     @db.VarChar(64)
+  movies    Recommendation[]
+  createdAt DateTime    @default(now())
+
+  @@index([pathHash, createdAt])
+  @@index([userId, type, createdAt])
+}
+
+model Movie {
+  id         Int      @id // TMDB id
+  title      String
+  year       Int?
+  posterPath String?
+  overview   String?
+  rating     Float?
+  runtime    Int?
+  genres     Json?    // TMDB genre objects
+  raw        Json     // full cached TMDB payload
+  fetchedAt  DateTime @default(now())
+  recs       Recommendation[]
+  feedback   MovieFeedback[]
+  saved      SavedMovie[]
+}
+
+model Recommendation {
+  id        String     @id @default(cuid())
+  sessionId String
+  session   RecSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  movieId   Int
+  movie     Movie      @relation(fields: [movieId], references: [id])
+  reason    String     // LLM one-liner, personalized
+  rank      Int        // 1..5
+
+  @@unique([sessionId, rank])
+  @@index([movieId])
+}
+
+model MovieFeedback {
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movieId   Int
+  movie     Movie    @relation(fields: [movieId], references: [id])
+  signal    Signal
+  createdAt DateTime @default(now())
+
+  @@id([userId, movieId])
+  @@index([userId, signal])
+}
+
+model SavedMovie {
+  userId  String
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movieId Int
+  movie   Movie    @relation(fields: [movieId], references: [id])
+  savedAt DateTime @default(now())
+
+  @@id([userId, movieId])
+}
+
+model TasteProfile {
+  userId       String   @id
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  genreWeights Json     // { "horror": 0.6, "scifi": 0.3, ... }
+  tasteSummary String   @default("")
+  signalCount  Int      @default(0) // signals since last summary regen
+  updatedAt    DateTime @updatedAt
+}
