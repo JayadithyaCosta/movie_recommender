@@ -45,12 +45,14 @@ Task-level tracking for the features in `docs/FEATURES.md`. Rules:
 
 ## F-03 · LLM provider abstraction
 
-- [ ] `lib/llm/index.ts` public API + provider selection via env
-- [ ] `gemini.ts` implementation (default provider, free tier, schema-constrained JSON)
-- [ ] `anthropic.ts` and `openai.ts` implementations (paid swap path)
-- [ ] zod schemas in `lib/schemas.ts` (RecBatch, RecSingle, TasteSummary)
-- [ ] Reinforced single retry on parse failure; error surfaced per SPEC §7
-- [ ] **Acceptance** (FEATURES F-03)
+- [x] `lib/llm/index.ts` public API + provider selection via env
+- [x] `gemini.ts` implementation (default provider, free tier, schema-constrained JSON)
+- [x] `anthropic.ts` and `openai.ts` implementations (paid swap path)
+- [x] zod schemas in `lib/schemas.ts` (RecBatch, RecSingle, TasteSummary)
+- [x] Reinforced single retry on parse failure; error surfaced per SPEC §7
+- [ ] **Acceptance** (FEATURES F-03) <!-- blocked: no working API key. GEMINI_API_KEY is
+      empty and the ANTHROPIC_API_KEY in .env returns 401. `make llm-smoke` proves it
+      end-to-end once a key is set. -->
 
 ## F-04 · TMDB integration & movie cache
 

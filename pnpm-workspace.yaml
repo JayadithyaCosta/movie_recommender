@@ -9,3 +9,7 @@ allowBuilds:
   prisma: true
   # bundler behind tsx (used by `make seed`)
   esbuild: true
+  # LLM SDK: its only install-time script is a no-op preinstall
+  '@google/genai': false
+  # transitive dep of @google/genai; its postinstall only sets up the pbjs CLI
+  protobufjs: false

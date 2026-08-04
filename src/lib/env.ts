@@ -29,13 +29,18 @@ const envSchema = z.object({
    * a paid swap — that is the whole point of the provider abstraction.
    */
   LLM_PROVIDER: z.enum(["gemini", "anthropic", "openai"]).default("gemini"),
-  LLM_MODEL: z.string().min(1).default("gemini-3.6-flash"),
   RATE_LIMIT_DISABLED: z
     .enum(["true", "false"])
     .default("false")
     .transform((v) => v === "true"),
 
   // --- optional until their owning feature lands ---
+  /**
+   * Left unset in most deployments: a model id is provider-specific, so
+   * `src/lib/llm` falls back to that provider's default and flipping
+   * LLM_PROVIDER alone stays a working configuration.
+   */
+  LLM_MODEL: optionalSecret, // F-03
   GEMINI_API_KEY: optionalSecret, // F-03 — required when LLM_PROVIDER=gemini
   ANTHROPIC_API_KEY: optionalSecret, // F-03
   OPENAI_API_KEY: optionalSecret, // F-03

@@ -1,7 +1,13 @@
 # PROMPTS — LLM templates
 
-All calls: temperature 0.8 (A/B/D) or 0.4 (C), `max_tokens` 600, JSON-only output, zod-validated.
+All calls: `max_tokens` 600, JSON-only output, zod-validated.
 The SYSTEM block is static — structure calls so provider prompt caching applies to it.
+
+**Temperature is no longer settable** (was: 0.8 for A/B/D, 0.4 for C). Every current
+default model — Gemini 3.x, Claude Opus 5, GPT-5.x — has removed `temperature`/`top_p`/
+`top_k`; sending them is a 400. `src/lib/llm` instead pins each provider's reasoning
+effort to its lowest setting, because thinking tokens are drawn from the same 600-token
+budget as the answer. Vary output through the prompt, not sampling.
 
 ## Template A — Mood wizard recommendations
 

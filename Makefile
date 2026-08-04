@@ -65,6 +65,10 @@ migrate-dev: ## Create/apply a dev migration (NAME=...)
 migrate: ## Apply migrations (deploy)
 	$(PM) exec prisma migrate deploy
 
+.PHONY: llm-smoke
+llm-smoke: ## Live-check the configured LLM provider (LLM_PROVIDER=... to override)
+	$(PM) exec tsx --env-file=.env scripts/llm-smoke.ts
+
 .PHONY: seed
 seed: ## Seed demo data
 	$(PM) exec tsx prisma/seed.ts
