@@ -65,6 +65,15 @@ export function useWizard(tree: StepTree): UseWizard {
   const depthRef = useRef(0);
   depthRef.current = picks.length;
 
+  // Stamp the entry the wizard started on. Without it, going back from the
+  // first question lands on an unmarked entry, the handler below treats it as
+  // "not ours", and the wizard stays stuck on step 2. Merging preserves the
+  // App Router's own history state, which it needs for its back/forward.
+  useEffect(() => {
+    if (readDepth(window.history.state) !== null) return;
+    window.history.replaceState({ ...window.history.state, [DEPTH_KEY]: 0 }, "");
+  }, []);
+
   useEffect(() => {
     const onPopState = (event: PopStateEvent) => {
       const depth = readDepth(event.state);
