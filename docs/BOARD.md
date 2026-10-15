@@ -11,7 +11,7 @@ Task-level tracking for the features in `docs/FEATURES.md`. Rules:
 
 - [x] F-01 Project scaffold
 - [x] F-02 Mood wizard UI
-- [ ] F-03 LLM provider abstraction
+- [x] F-03 LLM provider abstraction
 - [ ] F-04 TMDB integration & movie cache
 - [ ] F-05 Recommendation pipeline
 - [ ] F-06 Results & movie detail
@@ -50,9 +50,8 @@ Task-level tracking for the features in `docs/FEATURES.md`. Rules:
 - [x] `anthropic.ts` and `openai.ts` implementations (paid swap path)
 - [x] zod schemas in `lib/schemas.ts` (RecBatch, RecSingle, TasteSummary)
 - [x] Reinforced single retry on parse failure; error surfaced per SPEC §7
-- [ ] **Acceptance** (FEATURES F-03) <!-- blocked: no working API key. GEMINI_API_KEY is
-      empty and the ANTHROPIC_API_KEY in .env returns 401. `make llm-smoke` proves it
-      end-to-end once a key is set. -->
+- [x] **Acceptance** (FEATURES F-03) <!-- verified via `make llm-smoke` on Gemini (gemini-3.5-flash-lite;
+      the 3.6-flash free-tier quota was exhausted at verification time). -->
 
 ## F-04 · TMDB integration & movie cache
 
