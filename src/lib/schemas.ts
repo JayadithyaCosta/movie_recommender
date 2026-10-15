@@ -134,3 +134,26 @@ export const TmdbWatchProviders = z.object({
   id: z.number().int(),
   results: z.record(z.string(), TmdbRegionProviders),
 });
+
+// ---------- API bodies (F-05+) ----------
+
+const WizardPickBody = z.object({
+  stepId: z.string().min(1).max(64),
+  optionId: z.string().min(1).max(64),
+});
+
+/**
+ * The client sends raw picks, never labels or a readable path: the server
+ * rebuilds those from `src/config/steps.ts`, so nothing forged reaches a prompt.
+ */
+export const RecommendBody = z.discriminatedUnion("mode", [
+  z.object({
+    mode: z.literal("WIZARD"),
+    picks: z.array(WizardPickBody).min(1).max(10),
+    note: z.string().max(1000).optional(),
+  }),
+  z.object({ mode: z.literal("FOR_YOU") }),
+  z.object({ mode: z.literal("SURPRISE") }),
+]);
+
+export type RecommendBody = z.infer<typeof RecommendBody>;

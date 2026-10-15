@@ -223,6 +223,8 @@ export type DiscoverQuery = {
   yearTo?: number;
   sortBy?: "popularity.desc" | "vote_average.desc" | "vote_count.desc";
   minVotes?: number;
+  /** Floor on TMDB's 0–10 score; popularity sorts surface duds without it. */
+  minRating?: number;
   maxRuntime?: number;
   page?: number;
 };
@@ -240,6 +242,7 @@ export async function discoverMovies(query: DiscoverQuery): Promise<TmdbMovieSum
       language: "en-US",
       sort_by: query.sortBy ?? "popularity.desc",
       "vote_count.gte": query.minVotes ?? 300,
+      "vote_average.gte": query.minRating ?? 6.5,
       // with_genres: comma = AND, pipe = OR. Sub-genre hints are AND-ed onto the genre.
       with_genres: query.genreIds?.length ? query.genreIds.join(",") : undefined,
       without_genres: query.withoutGenreIds?.length ? query.withoutGenreIds.join(",") : undefined,

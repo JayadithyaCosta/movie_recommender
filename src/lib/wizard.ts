@@ -6,6 +6,21 @@
 
 export type StepId = string;
 
+/**
+ * How an option narrows TMDB `/discover` when the LLM is unavailable (and for
+ * backfill). Ids are TMDB genre/keyword ids, verified against the live API —
+ * keeping the mapping here means the fallback stays config-driven too.
+ */
+export type TmdbHint = {
+  /** AND-ed onto every other hint's genres. */
+  genreIds?: number[];
+  /** OR-ed together; dropped first when a query comes back too thin. */
+  keywordIds?: number[];
+  yearFrom?: number;
+  yearTo?: number;
+  sortBy?: "popularity.desc" | "vote_average.desc" | "vote_count.desc";
+};
+
 export type WizardOption = {
   /**
    * Stable identifier. It ends up in `WizardAnswers.byStep`, which F-05 hashes
@@ -19,6 +34,8 @@ export type WizardOption = {
   hint?: string;
   /** Branch to a specific step. Falls back to the step's own `next`. */
   next?: StepId;
+  /** Discover filters this pick implies; merged along the path by `mergeTmdbHints`. */
+  tmdb?: TmdbHint;
 };
 
 export type WizardStep = {
@@ -155,4 +172,36 @@ export function buildAnswers(
     readablePath: steps.map((step) => step.label).join(PATH_SEPARATOR),
     ...(normalizedNote ? { note: normalizedNote } : {}),
   };
+}
+
+/**
+ * Checks that client-sent picks form one complete path through the tree: starts
+ * at the root, every step follows from the previous pick, and the last pick
+ * ends the wizard. The server rebuilds labels from the tree, so a forged label
+ * can never reach a prompt.
+ */
+export function isCompletePath(tree: StepTree, picks: readonly WizardPick[]): boolean {
+  let expected: StepId | null = tree.rootId;
+  for (const pick of picks) {
+    if (expected === null || pick.stepId !== expected) return false;
+    const step = tree.steps[pick.stepId];
+    if (!step?.options.some((option) => option.id === pick.optionId)) return false;
+    expected = resolveNext(tree, pick.stepId, pick.optionId);
+  }
+  return picks.length > 0 && expected === null;
+}
+
+/** Folds every pick's `tmdb` hint into one discover query; later picks win on scalars. */
+export function mergeTmdbHints(tree: StepTree, answers: WizardAnswers): TmdbHint {
+  const merged: TmdbHint = {};
+  for (const answer of answers.steps) {
+    const hint = getOption(tree, answer.stepId, answer.optionId).tmdb;
+    if (!hint) continue;
+    if (hint.genreIds) merged.genreIds = [...(merged.genreIds ?? []), ...hint.genreIds];
+    if (hint.keywordIds) merged.keywordIds = [...(merged.keywordIds ?? []), ...hint.keywordIds];
+    if (hint.yearFrom !== undefined) merged.yearFrom = hint.yearFrom;
+    if (hint.yearTo !== undefined) merged.yearTo = hint.yearTo;
+    if (hint.sortBy) merged.sortBy = hint.sortBy;
+  }
+  return merged;
 }

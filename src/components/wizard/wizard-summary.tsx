@@ -9,20 +9,19 @@ type WizardSummaryProps = {
   answers: WizardAnswers;
   note: string;
   onNoteChange: (note: string) => void;
-  /** Fired when the note settles (blur) — F-05 drops this with the console log. */
-  onNoteCommit: () => void;
+  onSubmit: () => void;
+  /** Inline message above the CTA, e.g. a friendly rate-limit note. */
+  notice: string | null;
   onRestart: () => void;
 };
 
-/**
- * End of the wizard for F-02. F-05 replaces the disabled CTA with a
- * `POST /api/recommend` call and turns this into the loading state.
- */
+/** End of the wizard: confirm the path, optionally add a note, get five picks. */
 export function WizardSummary({
   answers,
   note,
   onNoteChange,
-  onNoteCommit,
+  onSubmit,
+  notice,
   onRestart,
 }: WizardSummaryProps) {
   const noteId = useId();
@@ -58,7 +57,6 @@ export function WizardSummary({
           id={noteId}
           value={note}
           onChange={(event) => onNoteChange(event.target.value)}
-          onBlur={onNoteCommit}
           maxLength={MAX_NOTE_LENGTH}
           rows={3}
           placeholder="nothing with jump scares, under 2 hours"
@@ -70,14 +68,18 @@ export function WizardSummary({
       </div>
 
       <div className="mt-auto space-y-3">
+        {notice ? (
+          <p role="alert" className="rounded-2xl bg-surface px-5 py-3 text-center text-sm text-muted">
+            {notice}
+          </p>
+        ) : null}
         <button
           type="button"
-          disabled
-          className="min-h-tap w-full rounded-2xl bg-accent px-6 py-4 text-base font-semibold text-accent-foreground disabled:opacity-40"
+          onClick={onSubmit}
+          className="min-h-tap w-full rounded-2xl bg-accent px-6 py-4 text-base font-semibold text-accent-foreground transition-transform focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none active:scale-[0.98]"
         >
           Find my 5
         </button>
-        <p className="text-center text-xs text-muted">Recommendations arrive in F-05.</p>
         <button
           type="button"
           onClick={onRestart}

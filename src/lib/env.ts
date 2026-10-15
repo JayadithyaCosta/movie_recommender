@@ -21,6 +21,8 @@ const envSchema = z.object({
   // --- required now ---
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required (see .env.example)"),
+  /** Signs the anonymous-session cookie (F-05) and Auth.js sessions (F-07). */
+  AUTH_SECRET: z.string().min(16, "AUTH_SECRET is required — `openssl rand -base64 32`"),
 
   // --- defaulted ---
   /**
@@ -45,7 +47,6 @@ const envSchema = z.object({
   ANTHROPIC_API_KEY: optionalSecret, // F-03
   OPENAI_API_KEY: optionalSecret, // F-03
   TMDB_READ_TOKEN: optionalSecret, // F-04
-  AUTH_SECRET: optionalSecret, // F-07
   AUTH_URL: optionalSecret, // F-07
   AUTH_GOOGLE_ID: optionalSecret, // F-07
   AUTH_GOOGLE_SECRET: optionalSecret, // F-07

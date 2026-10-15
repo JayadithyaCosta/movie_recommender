@@ -63,11 +63,11 @@ Task-level tracking for the features in `docs/FEATURES.md`. Rules:
 
 ## F-05 · Recommendation pipeline
 
-- [ ] `pathHash` normalization + `lib/cache.ts` (7-day shared cache, anonymous wizard only)
-- [ ] Prompt builder (Template A, optional taste block slot)
-- [ ] `POST /api/recommend`: LLM → TMDB resolve → backfill via /similar
-- [ ] Persist `RecSession` + 5 ranked `Recommendation` rows
-- [ ] Anonymous session cookie (signed) for later claiming
+- [x] `pathHash` normalization + `lib/cache.ts` (7-day shared cache, anonymous wizard only)
+- [x] Prompt builder (Template A, optional taste block slot)
+- [x] `POST /api/recommend`: LLM → TMDB resolve → backfill via /similar
+- [x] Persist `RecSession` + 5 ranked `Recommendation` rows
+- [x] Anonymous session cookie (signed) for later claiming
 - [ ] **Acceptance** (FEATURES F-05)
 
 ## F-06 · Results & movie detail

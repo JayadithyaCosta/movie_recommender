@@ -67,7 +67,9 @@ Each movie card shows three one-tap actions + save:
 
 ## 7. Failure modes (must handle)
 
-- LLM down/unparseable after retry → friendly "Our film curator is napping — try again" screen with retry; wizard answers preserved in client state.
+- LLM down/unparseable after retry → **TMDB-only fallback**: `/discover` driven by the `tmdb` hints on each option in `src/config/steps.ts` (genres, keywords, era range, pacing → sort) with a 6.5 rating floor, plus templated reasons that only claim what the filter guarantees. Results are still 100% TMDB-verified (rule 1 holds); fallback sessions are tagged `answers.source = "fallback"` and never seed the shared cache.
+- LLM *and* TMDB unavailable → friendly "Our film curator is napping — try again" screen with retry; wizard answers preserved in client state.
+- Hard filters the LLM can't be trusted with (the era the user tapped, ±1 year) are enforced on resolved picks; rejects are backfilled.
 - TMDB down → serve from `Movie` cache where possible; if a fresh session can't resolve, show error, don't show unverified LLM data.
 - Rate limiting: per-IP 10 recommend calls/hour (anonymous), per-user 30/day. Upstash-style sliding window or in-DB counter.
 

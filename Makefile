@@ -73,6 +73,10 @@ llm-smoke: ## Live-check the configured LLM provider (LLM_PROVIDER=... to overri
 tmdb-smoke: ## Live-check TMDB resolution + Movie cache (needs db-up)
 	$(PM) exec tsx --env-file=.env scripts/tmdb-smoke.ts
 
+.PHONY: rec-smoke
+rec-smoke: ## Run the wizard rec pipeline once (LLM_MODEL=bogus to test the fallback)
+	$(PM) exec tsx --env-file=.env scripts/rec-smoke.ts
+
 .PHONY: seed
 seed: ## Seed demo data
 	$(PM) exec tsx prisma/seed.ts

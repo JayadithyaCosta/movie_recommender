@@ -2,12 +2,15 @@
 
 import { AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback } from "react";
 
+import { ErrorPanel } from "@/components/ui/error-panel";
 import type { StepTree } from "@/lib/wizard";
 
+import { Curating } from "./curating";
 import { ProgressDots } from "./progress-dots";
 import { StepCard } from "./step-card";
+import { useRecommend } from "./use-recommend";
 import { useWizard } from "./use-wizard";
 import { WizardSummary } from "./wizard-summary";
 
@@ -19,6 +22,7 @@ export function Wizard({ tree }: WizardProps) {
   const {
     state,
     step,
+    picks,
     stepNumber,
     totalSteps,
     direction,
@@ -33,26 +37,34 @@ export function Wizard({ tree }: WizardProps) {
   const isComplete = state.status === "complete";
   const answers = isComplete ? state.answers : null;
 
-  // F-05 replaces this with POST /api/recommend; until then, completing the
-  // wizard is only observable in the console (PLAN.md Phase 1).
-  const answersRef = useRef(answers);
-  answersRef.current = answers;
+  const { status, submit, reset } = useRecommend();
 
-  // Keyed on the path, not the answers object — the object identity changes on
-  // every keystroke in the note field, which would spam the console.
-  const completedPath = answers?.readablePath ?? null;
-  useEffect(() => {
-    if (completedPath) {
-      console.log("Wizard answers", answersRef.current);
-    }
-  }, [completedPath]);
+  const findMovies = useCallback(() => {
+    void submit({ mode: "WIZARD", picks: [...picks], note: answers?.note });
+  }, [submit, picks, answers?.note]);
 
-  // Re-log once the note settles, so the note is observable too.
-  const logWithNote = useCallback(() => {
-    if (answersRef.current?.note) {
-      console.log("Wizard answers (with note)", answersRef.current);
-    }
-  }, []);
+  if (status.state === "loading") {
+    return (
+      <main className="flex flex-1 flex-col px-6 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+        <Curating />
+      </main>
+    );
+  }
+
+  if (status.state === "error") {
+    return (
+      <main className="flex flex-1 flex-col px-6 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+        <ErrorPanel onRetry={findMovies} backHref="/" />
+        <button
+          type="button"
+          onClick={reset}
+          className="min-h-tap mx-auto mt-2 text-sm text-muted underline underline-offset-4"
+        >
+          Change my answers
+        </button>
+      </main>
+    );
+  }
 
   return (
     <main className="flex flex-1 flex-col px-6 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
@@ -92,7 +104,8 @@ export function Wizard({ tree }: WizardProps) {
             answers={answers}
             note={note}
             onNoteChange={setNote}
-            onNoteCommit={logWithNote}
+            onSubmit={findMovies}
+            notice={status.state === "rate_limited" ? status.message : null}
             onRestart={restart}
           />
         ) : null}
