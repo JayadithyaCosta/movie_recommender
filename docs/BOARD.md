@@ -20,7 +20,7 @@ Task-level tracking for the features in `docs/FEATURES.md`. Rules:
 - [x] F-09 Feedback signals
 - [x] F-10 Taste profile engine
 - [x] F-11 For You feed
-- [ ] F-12 Failure modes & rate limiting
+- [x] F-12 Failure modes & rate limiting
 - [ ] F-13 PWA & ship polish
 
 ---
@@ -117,10 +117,10 @@ Task-level tracking for the features in `docs/FEATURES.md`. Rules:
 
 ## F-12 · Failure modes & rate limiting
 
-- [ ] LLM-down screen (answers preserved, retry)
-- [ ] TMDB-down: cache-first, never unverified data
-- [ ] Rate limits (10/h IP anon, 30/day user) → friendly 429
-- [ ] **Acceptance** (FEATURES F-12)
+- [x] LLM-down screen (answers preserved, retry)
+- [x] TMDB-down: cache-first, never unverified data
+- [x] Rate limits (10/h IP anon, 30/day user) → friendly 429
+- [x] **Acceptance** (FEATURES F-12)
 
 ## F-13 · PWA & ship polish
 

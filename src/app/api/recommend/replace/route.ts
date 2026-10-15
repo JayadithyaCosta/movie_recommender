@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getViewerMovieStates } from "@/lib/feedback";
 import { toMovieView } from "@/lib/movie-view";
 import { NotAllowedError, replacePick, RecommendUnavailableError } from "@/lib/recommend";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { ReplaceBody } from "@/lib/schemas";
 import { getViewer } from "@/lib/viewer";
 
@@ -12,6 +13,14 @@ export async function POST(request: Request) {
   if (!body.success) return NextResponse.json({ error: "bad_request" }, { status: 400 });
 
   const viewer = await getViewer();
+  const limit = await checkRateLimit(viewer.userId);
+  if (!limit.ok) {
+    return NextResponse.json(
+      { error: "rate_limited", message: limit.message },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfterS) } },
+    );
+  }
+
   try {
     const pick = await replacePick(body.data.sessionId, body.data.rank, viewer);
     const state = (await getViewerMovieStates(viewer.userId, [pick.movie.id]))[pick.movie.id];

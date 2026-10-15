@@ -52,6 +52,11 @@ export function ResultsList({ sessionId, picks: initial, signedIn, canSwap }: Re
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ sessionId, rank }),
         });
+        if (response.status === 429) {
+          const data = (await response.json().catch(() => ({}))) as { message?: string };
+          setToast(data.message ?? "Easy there — try again in a bit.");
+          return;
+        }
         if (!response.ok) throw new Error(String(response.status));
         const next = (await response.json()) as ListPick;
         setPicks((current) => current.map((pick) => (pick.rank === rank ? next : pick)));

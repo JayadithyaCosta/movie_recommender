@@ -9,6 +9,7 @@ import {
   RecommendUnavailableError,
   type RecommendResult,
 } from "@/lib/recommend";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { RecommendBody } from "@/lib/schemas";
 import { maybeRegenerateTaste } from "@/lib/taste";
 import { getViewer } from "@/lib/viewer";
@@ -23,6 +24,15 @@ export async function POST(request: Request) {
 
   const viewer = await getViewer();
   const { userId } = viewer;
+
+  const limit = await checkRateLimit(userId);
+  if (!limit.ok) {
+    return NextResponse.json(
+      { error: "rate_limited", message: limit.message },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfterS) } },
+    );
+  }
+
   // Lazy taste regen (SPEC §4.2) runs after the response, so it never adds
   // an LLM round-trip to the wait for picks.
   if (userId) after(() => maybeRegenerateTaste(userId).catch((e) => console.error("[taste]", e)));

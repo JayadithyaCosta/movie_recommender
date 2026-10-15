@@ -143,3 +143,15 @@ model TasteProfile {
   signalCount  Int      @default(0) // signals since last summary regen
   updatedAt    DateTime @updatedAt
 }
+
+// ---------- Rate limiting (F-12) ----------
+
+/// One row per rate-limited call; counted over a sliding window (SPEC §7).
+/// `key` is "ip:<addr>" for anonymous callers, "user:<id>" when signed in.
+model RateLimitHit {
+  id        String   @id @default(cuid())
+  key       String
+  createdAt DateTime @default(now())
+
+  @@index([key, createdAt])
+}

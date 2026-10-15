@@ -10,6 +10,8 @@ type ErrorPanelProps = {
   /** Secondary escape hatch; omitted when the retry is the only sensible move. */
   backHref?: string;
   backLabel?: string;
+  /** Extra in-place action, e.g. "Change my answers" in the wizard. */
+  secondary?: { label: string; onClick: () => void };
 };
 
 /** The friendly face of every upstream failure (SPEC §7) — never a raw error. */
@@ -20,6 +22,7 @@ export function ErrorPanel({
   retryLabel = "Try again",
   backHref,
   backLabel = "Back to start",
+  secondary,
 }: ErrorPanelProps) {
   return (
     <div role="alert" className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
@@ -38,6 +41,15 @@ export function ErrorPanel({
             className="min-h-tap w-full rounded-2xl bg-accent px-6 py-4 text-base font-semibold text-accent-foreground focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
           >
             {retryLabel}
+          </button>
+        ) : null}
+        {secondary ? (
+          <button
+            type="button"
+            onClick={secondary.onClick}
+            className="min-h-tap w-full rounded-2xl bg-surface px-6 text-base font-medium ring-1 ring-white/10 focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
+          >
+            {secondary.label}
           </button>
         ) : null}
         {backHref ? (

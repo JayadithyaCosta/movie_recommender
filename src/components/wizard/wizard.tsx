@@ -54,14 +54,11 @@ export function Wizard({ tree }: WizardProps) {
   if (status.state === "error") {
     return (
       <main className="flex flex-1 flex-col px-6 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
-        <ErrorPanel onRetry={findMovies} backHref="/" />
-        <button
-          type="button"
-          onClick={reset}
-          className="min-h-tap mx-auto mt-2 text-sm text-muted underline underline-offset-4"
-        >
-          Change my answers
-        </button>
+        <ErrorPanel
+          onRetry={findMovies}
+          secondary={{ label: "Change my answers", onClick: reset }}
+          backHref="/"
+        />
       </main>
     );
   }
