@@ -14,17 +14,64 @@ async function assertMovie(movieId: number): Promise<void> {
   if (!exists) throw new UnknownMovieError(`Movie ${movieId} is not cached`);
 }
 
-/** Add to / remove from the watchlist. */
+/**
+ * Every new signal bumps the counter that lazily triggers a taste-summary
+ * regen (SPEC §4.2). Undoing a tap does not count.
+ */
+async function countSignal(userId: string): Promise<void> {
+  await db.tasteProfile.upsert({
+    where: { userId },
+    create: { userId, genreWeights: {}, signalCount: 1 },
+    update: { signalCount: { increment: 1 } },
+  });
+}
+
+/**
+ * Add to / remove from the watchlist. Saving also records a SAVED signal, but
+ * never over a stronger one the user already gave (one signal per movie, and
+ * "loved it" says more than "maybe later").
+ */
 export async function setSaved(userId: string, movieId: number, on: boolean): Promise<void> {
   await assertMovie(movieId);
   if (on) {
-    await db.savedMovie.upsert({
-      where: { userId_movieId: { userId, movieId } },
-      create: { userId, movieId },
-      update: {},
-    });
+    await db.$transaction([
+      db.savedMovie.upsert({
+        where: { userId_movieId: { userId, movieId } },
+        create: { userId, movieId },
+        update: {},
+      }),
+      db.movieFeedback.upsert({
+        where: { userId_movieId: { userId, movieId } },
+        create: { userId, movieId, signal: "SAVED" },
+        update: {},
+      }),
+    ]);
+    await countSignal(userId);
   } else {
-    await db.savedMovie.deleteMany({ where: { userId, movieId } });
+    await db.$transaction([
+      db.savedMovie.deleteMany({ where: { userId, movieId } }),
+      db.movieFeedback.deleteMany({ where: { userId, movieId, signal: "SAVED" } }),
+    ]);
+  }
+}
+
+/** ❤️ / 👁 / ✕ — one upserted row per (user, movie); the latest tap wins. */
+export async function setSignal(
+  userId: string,
+  movieId: number,
+  signal: Exclude<Signal, "SAVED">,
+  on: boolean,
+): Promise<void> {
+  await assertMovie(movieId);
+  if (on) {
+    await db.movieFeedback.upsert({
+      where: { userId_movieId: { userId, movieId } },
+      create: { userId, movieId, signal },
+      update: { signal, createdAt: new Date() },
+    });
+    await countSignal(userId);
+  } else {
+    await db.movieFeedback.deleteMany({ where: { userId, movieId, signal } });
   }
 }
 

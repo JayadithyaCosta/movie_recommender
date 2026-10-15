@@ -17,7 +17,7 @@ Task-level tracking for the features in `docs/FEATURES.md`. Rules:
 - [x] F-06 Results & movie detail
 - [x] F-07 Auth & session claiming
 - [x] F-08 Profile page
-- [ ] F-09 Feedback signals
+- [x] F-09 Feedback signals
 - [ ] F-10 Taste profile engine
 - [ ] F-11 For You feed
 - [ ] F-12 Failure modes & rate limiting
@@ -93,10 +93,10 @@ Task-level tracking for the features in `docs/FEATURES.md`. Rules:
 
 ## F-09 · Feedback signals
 
-- [ ] ❤️ / 👁 / ✕ / bookmark actions on cards (optimistic UI)
-- [ ] `POST /api/feedback` upsert + `SavedMovie` handling
-- [ ] `signalCount` increment on `TasteProfile`
-- [ ] **Acceptance** (FEATURES F-09)
+- [x] ❤️ / 👁 / ✕ / bookmark actions on cards (optimistic UI)
+- [x] `POST /api/feedback` upsert + `SavedMovie` handling
+- [x] `signalCount` increment on `TasteProfile`
+- [x] **Acceptance** (FEATURES F-09)
 
 ## F-10 · Taste profile engine
 

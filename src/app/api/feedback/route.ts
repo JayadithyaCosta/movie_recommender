@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { setSaved, UnknownMovieError } from "@/lib/feedback";
+import { setSaved, setSignal, UnknownMovieError } from "@/lib/feedback";
 import { FeedbackBody } from "@/lib/schemas";
 import { getUserId } from "@/lib/viewer";
 
@@ -12,10 +12,9 @@ export async function POST(request: Request) {
   if (!body.success) return NextResponse.json({ error: "bad_request" }, { status: 400 });
 
   try {
-    if (body.data.signal !== "SAVED") {
-      return NextResponse.json({ error: "bad_request" }, { status: 400 });
-    }
-    await setSaved(userId, body.data.movieId, body.data.on);
+    const { movieId, signal, on } = body.data;
+    if (signal === "SAVED") await setSaved(userId, movieId, on);
+    else await setSignal(userId, movieId, signal, on);
     return NextResponse.json({ ok: true });
   } catch (error) {
     if (error instanceof UnknownMovieError) {

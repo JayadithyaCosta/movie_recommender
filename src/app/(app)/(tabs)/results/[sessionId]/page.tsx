@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { MovieCard } from "@/components/movie/movie-card";
-import { SaveButton } from "@/components/movie/save-button";
+import { FeedbackBar } from "@/components/movie/feedback-bar";
 import { getViewerMovieStates } from "@/lib/feedback";
 import { getResultsSession } from "@/lib/sessions";
 import { getUserId } from "@/lib/viewer";
@@ -63,8 +63,10 @@ export default async function ResultsPage({ params }: Params) {
               movie={pick.movie}
               priority={index < 2}
               actions={
-                <SaveButton
+                <FeedbackBar
                   movieId={pick.movie.id}
+                  title={pick.movie.title}
+                  initialSignal={states[pick.movie.id]?.signal ?? null}
                   initialSaved={states[pick.movie.id]?.saved ?? false}
                   signedIn={userId !== null}
                 />
