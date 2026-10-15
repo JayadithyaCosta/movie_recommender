@@ -69,6 +69,10 @@ migrate: ## Apply migrations (deploy)
 llm-smoke: ## Live-check the configured LLM provider (LLM_PROVIDER=... to override)
 	$(PM) exec tsx --env-file=.env scripts/llm-smoke.ts
 
+.PHONY: tmdb-smoke
+tmdb-smoke: ## Live-check TMDB resolution + Movie cache (needs db-up)
+	$(PM) exec tsx --env-file=.env scripts/tmdb-smoke.ts
+
 .PHONY: seed
 seed: ## Seed demo data
 	$(PM) exec tsx prisma/seed.ts

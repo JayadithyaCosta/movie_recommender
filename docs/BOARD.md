@@ -12,7 +12,7 @@ Task-level tracking for the features in `docs/FEATURES.md`. Rules:
 - [x] F-01 Project scaffold
 - [x] F-02 Mood wizard UI
 - [x] F-03 LLM provider abstraction
-- [ ] F-04 TMDB integration & movie cache
+- [x] F-04 TMDB integration & movie cache
 - [ ] F-05 Recommendation pipeline
 - [ ] F-06 Results & movie detail
 - [ ] F-07 Auth & session claiming
@@ -55,11 +55,11 @@ Task-level tracking for the features in `docs/FEATURES.md`. Rules:
 
 ## F-04 · TMDB integration & movie cache
 
-- [ ] `lib/tmdb.ts` client: Bearer auth, timeout, retry
-- [ ] search-with-year → fallback without year → vote_count ≥ 50 filter
-- [ ] `Movie` upsert cache with 30-day refresh
-- [ ] Detail + watch-providers fetchers; `next/image` domain config
-- [ ] **Acceptance** (FEATURES F-04)
+- [x] `lib/tmdb.ts` client: Bearer auth, timeout, retry
+- [x] search-with-year → fallback without year → vote_count ≥ 50 filter
+- [x] `Movie` upsert cache with 30-day refresh
+- [x] Detail + watch-providers fetchers; `next/image` domain config
+- [x] **Acceptance** (FEATURES F-04)
 
 ## F-05 · Recommendation pipeline
 
