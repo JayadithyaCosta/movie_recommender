@@ -303,10 +303,12 @@ export async function recommendWizard(
     if (hints.yearTo !== undefined && movie.year > hints.yearTo + 1) return false;
     return true;
   });
+  const tasteSummary = await tasteSummaryOf(viewer.userId);
+  if (tasteSummary) console.log(`[recommend] wizard prompt includes taste block`);
   const prompt = wizardPrompt({
     readablePath: answers.readablePath,
     note: answers.note,
-    tasteSummary: await tasteSummaryOf(viewer.userId),
+    tasteSummary,
     exclude: exclusions.titles,
   });
   const source = await fillFromLlm(set, prompt);

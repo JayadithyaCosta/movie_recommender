@@ -1,9 +1,10 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 
 import { STEP_TREE } from "@/config/steps";
 import { rememberAnonSession } from "@/lib/anon-cookie";
 import { recommendWizard, RecommendUnavailableError } from "@/lib/recommend";
 import { RecommendBody } from "@/lib/schemas";
+import { maybeRegenerateTaste } from "@/lib/taste";
 import { getViewer } from "@/lib/viewer";
 import { buildAnswers, isCompletePath } from "@/lib/wizard";
 
@@ -15,6 +16,10 @@ export async function POST(request: Request) {
   }
 
   const viewer = await getViewer();
+  const { userId } = viewer;
+  // Lazy taste regen (SPEC §4.2) runs after the response, so it never adds
+  // an LLM round-trip to the wait for picks.
+  if (userId) after(() => maybeRegenerateTaste(userId).catch((e) => console.error("[taste]", e)));
 
   try {
     if (body.data.mode !== "WIZARD") {

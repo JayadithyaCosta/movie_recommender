@@ -2,17 +2,20 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 
 import { auth, signOut } from "@/auth";
 import { Poster } from "@/components/movie/poster";
 import { posterUrl } from "@/lib/images";
 import { getHistory, getWatchlist } from "@/lib/profile";
+import { getTaste, maybeRegenerateTaste, REGEN_AFTER_SIGNALS } from "@/lib/taste";
 
 export const metadata: Metadata = { title: "Profile · Movie Recs" };
 
 const TABS = [
   { id: "watchlist", label: "Watchlist" },
   { id: "history", label: "History" },
+  { id: "taste", label: "Taste" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -27,7 +30,14 @@ export default async function ProfilePage({ searchParams }: Search) {
   const requested = (await searchParams).tab;
   const tab: TabId = TABS.some((t) => t.id === requested) ? (requested as TabId) : "watchlist";
 
-  const [watchlist, history] = await Promise.all([getWatchlist(user.id), getHistory(user.id)]);
+  const userId = user.id;
+  const [watchlist, history, taste] = await Promise.all([
+    getWatchlist(userId),
+    getHistory(userId),
+    getTaste(userId),
+  ]);
+  // Lazy regen check on profile load (SPEC §4.2); the new summary shows next visit.
+  after(() => maybeRegenerateTaste(userId).catch((e) => console.error("[taste]", e)));
 
   async function doSignOut() {
     "use server";
@@ -79,7 +89,9 @@ export default async function ProfilePage({ searchParams }: Search) {
         ))}
       </nav>
 
-      {tab === "watchlist" ? (
+      {tab === "taste" ? (
+        <TasteSection taste={taste} />
+      ) : tab === "watchlist" ? (
         watchlist.length > 0 ? (
           <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
             {watchlist.map((movie) => (
@@ -164,5 +176,52 @@ function Empty({ emoji, title, body, cta }: { emoji: string; title: string; body
         </Link>
       ) : null}
     </div>
+  );
+}
+
+function TasteSection({ taste }: { taste: Awaited<ReturnType<typeof getTaste>> }) {
+  const weights = Object.entries(taste?.genreWeights ?? {});
+  const toGo = Math.max(0, REGEN_AFTER_SIGNALS - (taste?.signalCount ?? 0));
+
+  return (
+    <section className="space-y-6">
+      <div className="space-y-3 rounded-3xl bg-surface p-6 ring-1 ring-white/5">
+        <h2 className="text-xs tracking-wider text-accent uppercase">Your taste, as we understand it</h2>
+        {taste?.summary ? (
+          <p className="text-lg leading-relaxed text-balance">{taste.summary}</p>
+        ) : (
+          <p className="text-base text-muted">
+            We&apos;re still getting to know you. Rate a few picks — ❤️ the ones you love, ✕ the ones
+            you don&apos;t — and we&apos;ll write up your taste
+            {toGo > 0 ? ` after ${toGo} more` : " shortly"}.
+          </p>
+        )}
+        <Link
+          href="/discover"
+          className="inline-flex min-h-tap items-center text-sm text-muted underline underline-offset-4 hover:text-foreground"
+        >
+          Not quite right? Run the wizard again
+        </Link>
+      </div>
+
+      {weights.length > 0 ? (
+        <div className="space-y-3 px-2">
+          <h2 className="text-xs tracking-wider text-muted uppercase">What you reach for</h2>
+          <ul className="space-y-3">
+            {weights.map(([genre, weight]) => (
+              <li key={genre} className="space-y-1">
+                <div className="flex justify-between text-sm">
+                  <span className="capitalize">{genre}</span>
+                  <span className="text-muted">{Math.round(weight * 100)}%</span>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-surface" aria-hidden="true">
+                  <div className="h-full rounded-full bg-accent" style={{ width: `${Math.max(4, weight * 100)}%` }} />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </section>
   );
 }

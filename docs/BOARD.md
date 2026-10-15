@@ -18,7 +18,7 @@ Task-level tracking for the features in `docs/FEATURES.md`. Rules:
 - [x] F-07 Auth & session claiming
 - [x] F-08 Profile page
 - [x] F-09 Feedback signals
-- [ ] F-10 Taste profile engine
+- [x] F-10 Taste profile engine
 - [ ] F-11 For You feed
 - [ ] F-12 Failure modes & rate limiting
 - [ ] F-13 PWA & ship polish
@@ -100,11 +100,11 @@ Task-level tracking for the features in `docs/FEATURES.md`. Rules:
 
 ## F-10 · Taste profile engine
 
-- [ ] genreWeights recompute (frequency + decay, pure code)
-- [ ] Template C summary regen; lazy trigger (≥5 signals or 14 days), counter reset
-- [ ] Taste summary shown on `/profile`
-- [ ] Logged-in wizard prompts include taste block
-- [ ] **Acceptance** (FEATURES F-10)
+- [x] genreWeights recompute (frequency + decay, pure code)
+- [x] Template C summary regen; lazy trigger (≥5 signals or 14 days), counter reset
+- [x] Taste summary shown on `/profile`
+- [x] Logged-in wizard prompts include taste block
+- [x] **Acceptance** (FEATURES F-10)
 
 ## F-11 · For You feed
 
