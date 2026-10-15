@@ -76,3 +76,5 @@ Each movie card shows three one-tap actions + save:
 ## 8. Non-goals (v1)
 
 No TV shows, no social features, no reviews, no multi-language UI, no React Native — PWA only.
+
+PWA implementation note (F-13): `next-pwa` (and its forks) hook webpack, but `make build` runs Turbopack, so installability uses Next's native `src/app/manifest.ts` plus a small hand-written `public/sw.js` (cache-first static assets, stale-while-revalidate posters, network-first pages, API never cached), registered in production only.

@@ -125,11 +125,11 @@ Task-level tracking for the features in `docs/FEATURES.md`. Rules:
 
 ## F-13 · PWA & ship polish
 
-- [ ] next-pwa + manifest + icons; installable
-- [ ] Loading/error states on every route
-- [ ] `make seed` demo data
-- [ ] Lighthouse mobile: perf ≥ 90 on results, PWA pass
-- [ ] **Acceptance** (FEATURES F-13)
+- [x] Native `app/manifest.ts` + icons + hand-written `public/sw.js` (next-pwa needs webpack; build is Turbopack — see SPEC §8)
+- [x] Loading/error states on every route
+- [x] `make seed` demo data
+- [x] Lighthouse mobile: perf ≥ 90 on results (92–96 over 3 runs; `make lighthouse`). Lighthouse 12 dropped the PWA category — manifest + SW served and valid
+- [ ] **Acceptance** (FEATURES F-13) <!-- pending: install to a real phone home screen (needs HTTPS deploy or a LAN tunnel) -->
 
 ## F-14 · Rec UX boosts
 

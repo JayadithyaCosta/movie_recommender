@@ -82,12 +82,17 @@ rec-smoke: ## Run the wizard rec pipeline once (LLM_MODEL=bogus to test the fall
 	$(PM) exec tsx --env-file=.env scripts/rec-smoke.ts
 
 .PHONY: seed
-seed: ## Seed demo data
-	$(PM) exec tsx prisma/seed.ts
+seed: ## Seed demo data (demo@movierecs.test; needs db-up + TMDB_READ_TOKEN)
+	$(PM) exec tsx --env-file=.env prisma/seed.ts
 
 .PHONY: studio
 studio: ## Open Prisma Studio
 	$(PM) exec prisma studio
+
+.PHONY: lighthouse
+lighthouse: ## Lighthouse mobile audit of a running server (URL=..., default home)
+	mkdir -p .lighthouse
+	$(PM) dlx lighthouse@12 $(or $(URL),http://localhost:3000/) --form-factor=mobile --only-categories=performance,accessibility,best-practices,seo --chrome-flags="--headless=new" --output=json --output=html --output-path=./.lighthouse/report --quiet
 
 .PHONY: check
 check: lint typecheck ## Lint + typecheck (pre-commit gate)
