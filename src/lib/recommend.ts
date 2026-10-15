@@ -4,9 +4,10 @@ import { STEP_TREE } from "@/config/steps";
 import { findCachedPicks, pathHashOf } from "@/lib/cache";
 import { db } from "@/lib/db";
 import { buildAnonExclusions, buildExclusions, type Exclusions } from "@/lib/exclusions";
-import { getCandidates, LlmError, type LlmPrompt } from "@/lib/llm";
-import { wizardPrompt } from "@/lib/prompts";
-import type { Candidate } from "@/lib/schemas";
+import { getCandidates, getReplacementCandidate, LlmError, type LlmPrompt } from "@/lib/llm";
+import { forYouPrompt, replacePrompt, wizardPrompt } from "@/lib/prompts";
+import { StoredAnswersSchema, type Candidate } from "@/lib/schemas";
+import { feedbackTitles, getTaste, type GenreWeights } from "@/lib/taste";
 import {
   discoverMovies,
   getMovie,
@@ -15,7 +16,7 @@ import {
   TmdbError,
   type DiscoverQuery,
 } from "@/lib/tmdb";
-import { mergeTmdbHints, type WizardAnswers } from "@/lib/wizard";
+import { mergeTmdbHints, type TmdbHint, type WizardAnswers } from "@/lib/wizard";
 
 /**
  * The recommendation pipeline (SPEC §3): cache → prompt → LLM → TMDB
@@ -66,6 +67,7 @@ class PickSet {
     private readonly exclusions: Exclusions,
     /** Hard constraints the LLM is told about but can't be trusted to keep. */
     private readonly accepts: (movie: Movie) => boolean = () => true,
+    private readonly size: number = BATCH_SIZE,
   ) {}
 
   has(id: number): boolean {
@@ -84,7 +86,7 @@ class PickSet {
   }
 
   get missing(): number {
-    return BATCH_SIZE - this.picks.length;
+    return this.size - this.picks.length;
   }
 
   get full(): boolean {
@@ -242,6 +244,19 @@ async function tasteSummaryOf(userId: string | null): Promise<string | undefined
   return profile?.tasteSummary || undefined;
 }
 
+/**
+ * The era the user tapped is a hard filter: one year of slack for
+ * release-date quirks, none beyond.
+ */
+function withinEra(hints: TmdbHint): (movie: Movie) => boolean {
+  return (movie) => {
+    if (movie.year === null) return true;
+    if (hints.yearFrom !== undefined && movie.year < hints.yearFrom - 1) return false;
+    if (hints.yearTo !== undefined && movie.year > hints.yearTo + 1) return false;
+    return true;
+  };
+}
+
 // ---------- wizard ----------
 
 /**
@@ -294,15 +309,9 @@ export async function recommendWizard(
     console.log(`[cache] miss ${pathHash.slice(0, 12)} "${answers.readablePath}"`);
   }
 
-  // 2–5. LLM, then TMDB-only rungs of the ladder. The era the user tapped is a
-  // hard filter: one year of slack for release-date quirks, none beyond.
+  // 2–5. LLM, then TMDB-only rungs of the ladder.
   const hints = mergeTmdbHints(STEP_TREE, answers);
-  const set = new PickSet(exclusions, (movie) => {
-    if (movie.year === null) return true;
-    if (hints.yearFrom !== undefined && movie.year < hints.yearFrom - 1) return false;
-    if (hints.yearTo !== undefined && movie.year > hints.yearTo + 1) return false;
-    return true;
-  });
+  const set = new PickSet(exclusions, withinEra(hints));
   const tasteSummary = await tasteSummaryOf(viewer.userId);
   if (tasteSummary) console.log(`[recommend] wizard prompt includes taste block`);
   const prompt = wizardPrompt({
@@ -328,4 +337,184 @@ export async function recommendWizard(
   });
   console.log(`[recommend] wizard session ${sessionId} via ${source}`);
   return { sessionId, source };
+}
+
+// ---------- For You ----------
+
+const FOR_YOU_COOLDOWN_MS = 12 * 60 * 60 * 1000;
+
+export type RefreshGate = { allowed: true } | { allowed: false; nextAt: Date };
+
+/**
+ * One regeneration per 12h, unless the user has given new signals since the
+ * last batch — then their feed should react immediately (SPEC §2.2).
+ */
+export async function forYouRefreshGate(userId: string): Promise<RefreshGate> {
+  const latest = await db.recSession.findFirst({
+    where: { userId, type: "FOR_YOU" },
+    orderBy: { createdAt: "desc" },
+    select: { createdAt: true },
+  });
+  if (!latest) return { allowed: true };
+
+  const nextAt = new Date(latest.createdAt.getTime() + FOR_YOU_COOLDOWN_MS);
+  if (nextAt.getTime() <= Date.now()) return { allowed: true };
+
+  const fresh = await db.movieFeedback.count({
+    where: { userId, createdAt: { gt: latest.createdAt } },
+  });
+  return fresh > 0 ? { allowed: true } : { allowed: false, nextAt };
+}
+
+export class CooldownError extends Error {
+  constructor(readonly nextAt: Date) {
+    super(`For You refresh locked until ${nextAt.toISOString()}`);
+    this.name = "CooldownError";
+  }
+}
+
+/** Genre label ("sci-fi") → TMDB genre ids, via the wizard's root step config. */
+function genreIdsFor(label: string): number[] {
+  const root = STEP_TREE.steps[STEP_TREE.rootId];
+  const option = root?.options.find((o) => o.label.toLowerCase() === label);
+  return option?.tmdb?.genreIds ?? [];
+}
+
+function topGenreQuery(weights: GenreWeights, index: number): DiscoverQuery {
+  const ranked = Object.keys(weights);
+  const genre = ranked.length > 0 ? ranked[index % ranked.length] : undefined;
+  return {
+    genreIds: genre ? genreIdsFor(genre) : undefined,
+    sortBy: "vote_average.desc",
+    minVotes: 1000,
+  };
+}
+
+const FOR_YOU_FALLBACK_REASON = (movie: Movie) =>
+  `A highly rated ${movie.year ?? ""} pick in the genres you come back to most.`.replace("  ", " ");
+
+/** Template B batch from the user's profile, never repeating anything (rule 6). */
+export async function recommendForYou(userId: string): Promise<RecommendResult> {
+  const gate = await forYouRefreshGate(userId);
+  if (!gate.allowed) throw new CooldownError(gate.nextAt);
+
+  const [exclusions, taste, titles] = await Promise.all([
+    buildExclusions(userId),
+    getTaste(userId),
+    feedbackTitles(userId),
+  ]);
+  const genreWeights = taste?.genreWeights ?? {};
+
+  const set = new PickSet(exclusions);
+  const source = await fillFromLlm(
+    set,
+    forYouPrompt({
+      tasteSummary: taste?.summary ?? "",
+      genreWeights,
+      loved: titles.loved,
+      exclude: exclusions.titles,
+    }),
+  );
+
+  for (let round = 0; !set.full && round < 3; round += 1) {
+    await attempt("for-you discover backfill", () =>
+      backfillDiscover(set, topGenreQuery(genreWeights, round), FOR_YOU_FALLBACK_REASON),
+    );
+  }
+
+  const sessionId = await persistSession({
+    type: "FOR_YOU",
+    userId,
+    answers: null,
+    pathHash: null,
+    picks: ensureFull(set),
+  });
+  console.log(`[recommend] for-you session ${sessionId} via ${source}`);
+  return { sessionId, source };
+}
+
+// ---------- replace one pick (Template D) ----------
+
+export class NotAllowedError extends Error {}
+
+export type Replacement = { recId: string; rank: number; reason: string; movie: Movie };
+
+/**
+ * Swaps the pick at `rank` for a new one, in place (SPEC §4.1, F-14). Works on
+ * For You batches and wizard results alike; anonymous viewers may swap only
+ * sessions their own cookie vouches for.
+ */
+export async function replacePick(sessionId: string, rank: number, viewer: Viewer): Promise<Replacement> {
+  const session = await db.recSession.findUnique({
+    where: { id: sessionId },
+    include: { movies: { orderBy: { rank: "asc" }, include: { movie: true } } },
+  });
+  const owns =
+    session &&
+    (session.userId
+      ? session.userId === viewer.userId
+      : viewer.anonSessionIds.includes(session.id));
+  if (!session || !owns) throw new NotAllowedError("Not your session");
+
+  const target = session.movies.find((rec) => rec.rank === rank);
+  if (!target) throw new NotAllowedError("No pick at that rank");
+
+  const base = await exclusionsFor(viewer);
+  const exclusions: Exclusions = {
+    ids: new Set([...base.ids, ...session.movies.map((rec) => rec.movieId)]),
+    titles: base.titles,
+  };
+
+  const answers = StoredAnswersSchema.safeParse(session.answers);
+  const hints = answers.success ? mergeTmdbHints(STEP_TREE, answers.data) : {};
+  const summary = await tasteSummaryOf(viewer.userId);
+  const tasteLine = answers.success
+    ? `Tonight's preferences: ${answers.data.readablePath}${summary ? `. General taste: ${summary}` : ""}`
+    : (summary ?? "Broad, well-reviewed crowd-pleasers.");
+
+  const set = new PickSet(exclusions, withinEra(hints), 1);
+  try {
+    const candidate = await getReplacementCandidate(
+      replacePrompt({
+        taste: tasteLine,
+        rejected: target.movie.title,
+        currentBatch: session.movies.filter((rec) => rec.rank !== rank).map((rec) => rec.movie.title),
+        exclude: exclusions.titles,
+      }),
+    );
+    const movie = await resolveCandidate(candidate);
+    if (movie) set.add({ movie, reason: candidate.reason });
+  } catch (error) {
+    if (!(error instanceof LlmError) && !(error instanceof TmdbError)) throw error;
+    console.warn(`[recommend] replace via LLM failed, using discover:`, error.message);
+  }
+
+  if (!set.full) {
+    const weights = (await getTaste(viewer.userId ?? ""))?.genreWeights ?? {};
+    const query = answers.success ? hints : topGenreQuery(weights, 0);
+    const reason = answers.success
+      ? fallbackReason(answers.data)
+      : (movie: Movie) => FOR_YOU_FALLBACK_REASON(movie);
+    await attempt("replace discover", () => backfillDiscover(set, query, reason));
+  }
+
+  const [pick] = ensureFullOf(set, 1);
+  const updated = await db.$transaction(async (tx) => {
+    // A swapped session no longer matches its path's cached answer.
+    if (session.pathHash) await tx.recSession.update({ where: { id: session.id }, data: { pathHash: null } });
+    return tx.recommendation.update({
+      where: { id: target.id },
+      data: { movieId: pick.movie.id, reason: pick.reason },
+    });
+  });
+  console.log(`[recommend] swapped #${rank} "${target.movie.title}" → "${pick.movie.title}"`);
+  return { recId: updated.id, rank, reason: pick.reason, movie: pick.movie };
+}
+
+function ensureFullOf(set: PickSet, size: number): [Pick] {
+  const [pick] = set.picks;
+  if (!pick || set.picks.length < size) {
+    throw new RecommendUnavailableError("No replacement could be verified");
+  }
+  return [pick];
 }

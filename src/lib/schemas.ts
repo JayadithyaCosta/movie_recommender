@@ -179,3 +179,8 @@ export const FeedbackBody = z.object({
 });
 
 export type FeedbackBody = z.infer<typeof FeedbackBody>;
+
+export const ReplaceBody = z.object({
+  sessionId: z.string().min(1).max(64),
+  rank: z.number().int().min(1).max(5),
+});

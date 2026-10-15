@@ -19,7 +19,7 @@ Task-level tracking for the features in `docs/FEATURES.md`. Rules:
 - [x] F-08 Profile page
 - [x] F-09 Feedback signals
 - [x] F-10 Taste profile engine
-- [ ] F-11 For You feed
+- [x] F-11 For You feed
 - [ ] F-12 Failure modes & rate limiting
 - [ ] F-13 PWA & ship polish
 
@@ -108,12 +108,12 @@ Task-level tracking for the features in `docs/FEATURES.md`. Rules:
 
 ## F-11 · For You feed
 
-- [ ] `/for-you` renders latest FOR_YOU batch from DB
-- [ ] Refresh w/ 12h cooldown, bypassed by new signals
-- [ ] Exclusion list assembly (past recs + SEEN/NOT_FOR_ME, cap 60) + post-resolve filter
-- [ ] Empty state for users with no signals
-- [ ] ✕ → Template D in-place card swap
-- [ ] **Acceptance** (FEATURES F-11)
+- [x] `/for-you` renders latest FOR_YOU batch from DB
+- [x] Refresh w/ 12h cooldown, bypassed by new signals
+- [x] Exclusion list assembly (past recs + SEEN/NOT_FOR_ME, cap 60) + post-resolve filter
+- [x] Empty state for users with no signals
+- [x] ✕ → Template D in-place card swap
+- [x] **Acceptance** (FEATURES F-11)
 
 ## F-12 · Failure modes & rate limiting
 

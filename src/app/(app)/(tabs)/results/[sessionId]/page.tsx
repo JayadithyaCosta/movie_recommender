@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { MovieCard } from "@/components/movie/movie-card";
-import { FeedbackBar } from "@/components/movie/feedback-bar";
+import { ResultsList } from "@/components/movie/results-list";
+import { readAnonSessionIds } from "@/lib/anon-cookie";
 import { getViewerMovieStates } from "@/lib/feedback";
 import { getResultsSession } from "@/lib/sessions";
 import { getUserId } from "@/lib/viewer";
@@ -19,6 +19,11 @@ export default async function ResultsPage({ params }: Params) {
   if (!session) notFound();
 
   const userId = await getUserId();
+  // Swapping rewrites the session, so only its owner (or the anonymous
+  // browser that created it) gets the ✕-to-swap behaviour.
+  const canSwap = session.userId
+    ? session.userId === userId
+    : (await readAnonSessionIds()).includes(session.id);
   const states = await getViewerMovieStates(
     userId,
     session.picks.map((pick) => pick.movie.id),
@@ -54,27 +59,15 @@ export default async function ResultsPage({ params }: Params) {
         ) : null}
       </header>
 
-      <ol className="grid gap-3 md:grid-cols-2 md:gap-4 xl:grid-cols-5">
-        {session.picks.map((pick, index) => (
-          <li key={pick.recId} className={index === 0 ? "md:col-span-2 xl:col-span-1" : undefined}>
-            <MovieCard
-              rank={pick.rank}
-              reason={pick.reason}
-              movie={pick.movie}
-              priority={index < 2}
-              actions={
-                <FeedbackBar
-                  movieId={pick.movie.id}
-                  title={pick.movie.title}
-                  initialSignal={states[pick.movie.id]?.signal ?? null}
-                  initialSaved={states[pick.movie.id]?.saved ?? false}
-                  signedIn={userId !== null}
-                />
-              }
-            />
-          </li>
-        ))}
-      </ol>
+      <ResultsList
+        sessionId={session.id}
+        signedIn={userId !== null}
+        canSwap={canSwap}
+        picks={session.picks.map((pick) => ({
+          ...pick,
+          state: states[pick.movie.id] ?? { saved: false, signal: null },
+        }))}
+      />
 
       <footer className="mt-2 flex flex-col gap-3 px-2 sm:flex-row sm:justify-center">
         <Link

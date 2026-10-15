@@ -43,3 +43,22 @@ export async function getResultsSession(id: string): Promise<ResultsSession | nu
     })),
   };
 }
+
+/** The current For You batch — a DB read only, never an LLM call (SPEC §2.2). */
+export async function getLatestForYou(userId: string): Promise<ResultsSession | null> {
+  const latest = await db.recSession.findFirst({
+    where: { userId, type: "FOR_YOU" },
+    orderBy: { createdAt: "desc" },
+    select: { id: true },
+  });
+  return latest ? getResultsSession(latest.id) : null;
+}
+
+/** Whether a user has given us anything to learn from yet. */
+export async function hasTasteHistory(userId: string): Promise<boolean> {
+  const [sessions, signals] = await Promise.all([
+    db.recSession.count({ where: { userId, type: "WIZARD" } }),
+    db.movieFeedback.count({ where: { userId } }),
+  ]);
+  return sessions + signals > 0;
+}

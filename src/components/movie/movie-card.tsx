@@ -21,7 +21,7 @@ type MovieCardProps = {
  */
 export function MovieCard({ rank, reason, movie, actions, priority }: MovieCardProps) {
   return (
-    <article className="group flex gap-4 rounded-3xl bg-surface p-3 ring-1 ring-white/5 xl:flex-col xl:gap-3">
+    <article className="group flex h-full gap-4 rounded-3xl bg-surface p-3 ring-1 ring-white/5 xl:flex-col xl:gap-3">
       <Link
         href={`/movie/${movie.id}`}
         scroll={false}
