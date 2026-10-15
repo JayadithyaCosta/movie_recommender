@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { ForYouRefresh } from "@/components/movie/for-you-refresh";
 import { ResultsList } from "@/components/movie/results-list";
+import { PAGE } from "@/components/ui/page";
 import { getViewerMovieStates } from "@/lib/feedback";
 import { forYouRefreshGate } from "@/lib/recommend";
 import { getLatestForYou, hasTasteHistory } from "@/lib/sessions";
@@ -10,8 +11,6 @@ import { getTaste } from "@/lib/taste";
 import { getUserId } from "@/lib/viewer";
 
 export const metadata: Metadata = { title: "For You · Movie Recs" };
-
-const COLUMN = "mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 pt-6 pb-8 md:max-w-3xl md:px-6 md:pt-10 xl:max-w-6xl";
 
 /** Page views are DB reads only; the LLM runs only on an explicit refresh. */
 export default async function ForYouPage() {
@@ -28,7 +27,7 @@ export default async function ForYouPage() {
   if (!batch) {
     const ready = await hasTasteHistory(userId);
     return (
-      <main className={COLUMN}>
+      <main className={PAGE}>
         <div className="flex flex-1 flex-col items-center justify-center gap-5 text-center">
           <span aria-hidden="true" className="text-6xl">
             ✨
@@ -69,7 +68,7 @@ export default async function ForYouPage() {
   );
 
   return (
-    <main className={COLUMN}>
+    <main className={PAGE}>
       <header className="flex flex-col gap-4 px-2 md:flex-row md:items-end md:justify-between">
         <div className="space-y-2">
           <p className="text-sm tracking-[0.2em] text-accent uppercase">For you</p>
@@ -98,7 +97,7 @@ export default async function ForYouPage() {
 
 function SignedOut() {
   return (
-    <main className={COLUMN}>
+    <main className={PAGE}>
       <div className="flex flex-1 flex-col items-center justify-center gap-5 text-center">
         <span aria-hidden="true" className="text-6xl">
           🍿

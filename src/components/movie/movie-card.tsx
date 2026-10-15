@@ -12,26 +12,30 @@ type MovieCardProps = {
   /** Feedback / swap controls — kept outside the link so taps never collide. */
   actions?: React.ReactNode;
   priority?: boolean;
+  /** The #1 pick: spans the full row from `md:` and gets a bigger poster on desktop. */
+  featured?: boolean;
 };
 
 /**
- * One ranked pick. Horizontal on phones (poster left, reason right — the
- * reason is the point of the app, so it gets the room); a vertical poster card
- * once five fit across.
+ * One ranked pick. Always horizontal — poster left, reason right — because the
+ * reason is the point of the app and deserves the room, never a clamp. On
+ * desktop the poster and type scale up instead of the card going vertical.
  */
-export function MovieCard({ rank, reason, movie, actions, priority }: MovieCardProps) {
+export function MovieCard({ rank, reason, movie, actions, priority, featured }: MovieCardProps) {
   return (
-    <article className="group flex h-full gap-4 rounded-3xl bg-surface p-3 ring-1 ring-white/5 xl:flex-col xl:gap-3">
+    <article
+      className={`group flex h-full gap-4 rounded-3xl bg-surface p-3 ring-1 ring-white/5 lg:p-4 ${featured ? "lg:gap-6" : "lg:gap-5"}`}
+    >
       <Link
         href={`/movie/${movie.id}`}
         scroll={false}
-        className="relative w-28 shrink-0 rounded-xl focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none sm:w-32 xl:w-full"
+        className={`relative w-28 shrink-0 rounded-xl focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none sm:w-32 ${featured ? "lg:w-52" : "lg:w-36"}`}
         aria-label={`${movie.title} — details`}
       >
         <Poster
           path={movie.posterPath}
           title={movie.title}
-          sizes="(min-width: 1280px) 200px, 128px"
+          sizes={featured ? "(min-width: 1024px) 208px, 128px" : "(min-width: 1024px) 144px, 128px"}
           priority={priority}
           className="transition-transform duration-300 group-hover:scale-[1.02]"
         />
@@ -43,13 +47,13 @@ export function MovieCard({ rank, reason, movie, actions, priority }: MovieCardP
         </span>
       </Link>
 
-      <div className="flex min-w-0 flex-1 flex-col gap-2 py-1 xl:px-1">
+      <div className="flex min-w-0 flex-1 flex-col gap-2 py-1 lg:gap-3">
         <div>
-          <h2 className="text-lg leading-snug font-semibold">
+          <h2 className={`text-lg leading-snug font-semibold ${featured ? "lg:text-2xl" : "lg:text-xl"}`}>
             <Link
               href={`/movie/${movie.id}`}
               scroll={false}
-              className="rounded focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
+              className="rounded hover:text-accent focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
             >
               <span className="sr-only">Pick {rank}: </span>
               {movie.title}
@@ -58,7 +62,9 @@ export function MovieCard({ rank, reason, movie, actions, priority }: MovieCardP
           <MovieMeta year={movie.year} runtime={movie.runtime} rating={movie.rating} />
         </div>
 
-        <p className="text-[0.95rem] leading-relaxed text-foreground/85 xl:line-clamp-5 xl:text-sm">
+        <p
+          className={`text-[0.95rem] leading-relaxed text-foreground/85 ${featured ? "lg:max-w-2xl lg:text-lg" : "lg:text-base"}`}
+        >
           {reason}
         </p>
 

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { RegenerateButton } from "@/components/movie/regenerate-button";
 import { ResultsList } from "@/components/movie/results-list";
+import { PAGE } from "@/components/ui/page";
 import { readAnonSessionIds } from "@/lib/anon-cookie";
 import { getViewerMovieStates } from "@/lib/feedback";
 import { getResultsSession } from "@/lib/sessions";
@@ -35,7 +36,7 @@ export default async function ResultsPage({ params }: Params) {
   const chips = answers?.byStep.surprise ? [] : (answers?.steps.map((step) => step.label) ?? []);
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 pt-6 pb-8 md:max-w-3xl md:px-6 md:pt-10 xl:max-w-6xl">
+    <main className={PAGE}>
       <header className="space-y-3 px-2">
         <p className="text-sm tracking-[0.2em] text-accent uppercase">
           {session.type === "FOR_YOU"

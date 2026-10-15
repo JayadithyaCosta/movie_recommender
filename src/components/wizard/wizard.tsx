@@ -2,7 +2,7 @@
 
 import { AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 
 import { ErrorPanel } from "@/components/ui/error-panel";
 import type { StepTree } from "@/lib/wizard";
@@ -42,6 +42,33 @@ export function Wizard({ tree }: WizardProps) {
   const findMovies = useCallback(() => {
     void submit({ mode: "WIZARD", picks: [...picks], note: answers?.note });
   }, [submit, picks, answers?.note]);
+
+  // Desktop keyboard shortcuts (F-16): 1–9 pick the matching option, Esc /
+  // Backspace go back. Driven purely by `step.options`, so the tree stays the
+  // only place step logic lives (CLAUDE.md rule 3).
+  const busy = status.state === "loading" || status.state === "error";
+  useEffect(() => {
+    if (busy) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey || event.altKey || event.defaultPrevented) return;
+      const target = event.target as HTMLElement | null;
+      if (target?.closest("input, textarea, select, [contenteditable='true']")) return;
+
+      if ((event.key === "Escape" || event.key === "Backspace") && canGoBack) {
+        event.preventDefault();
+        back();
+        return;
+      }
+      if (step && /^[1-9]$/.test(event.key)) {
+        const option = step.options[Number(event.key) - 1];
+        if (!option) return;
+        event.preventDefault();
+        select(option.id);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [busy, canGoBack, back, step, select]);
 
   if (status.state === "loading") {
     return (

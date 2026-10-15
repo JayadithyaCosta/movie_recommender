@@ -56,7 +56,7 @@ export default async function LoginPage({ searchParams }: Search) {
   const error = params.error ? (ERRORS[params.error] ?? ERRORS.default) : null;
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-8 px-6 py-10">
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-8 px-6 py-10 lg:my-16 lg:max-w-lg lg:flex-none lg:rounded-3xl lg:bg-surface/60 lg:p-10 lg:ring-1 lg:ring-white/5">
       <div className="space-y-3">
         <p className="text-sm tracking-[0.2em] text-accent uppercase">Movie Recs</p>
         <h1 className="text-3xl leading-tight font-semibold text-balance">

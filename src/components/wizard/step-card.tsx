@@ -40,11 +40,14 @@ export function StepCard({ step, direction, onSelect }: StepCardProps) {
         <h1
           ref={headingRef}
           tabIndex={-1}
-          className="text-3xl leading-tight font-semibold text-balance focus:outline-none"
+          className="text-3xl leading-tight font-semibold text-balance focus:outline-none lg:text-4xl"
         >
           {step.question}
         </h1>
         {step.subtitle ? <p className="text-base text-muted">{step.subtitle}</p> : null}
+        <p className="hidden text-xs text-muted/70 lg:block">
+          Tip: press a number to pick, Esc to go back.
+        </p>
       </div>
 
       <OptionGrid options={step.options} onSelect={onSelect} />

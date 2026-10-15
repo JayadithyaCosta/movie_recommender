@@ -98,3 +98,8 @@ Three additions beyond the v1 spec that make getting a good set of five faster:
 (2) "None of these? Get 5 new" under wizard/Surprise results reruns the same brief as a new session (`mode: "AGAIN"`) with the current five excluded and the shared cache bypassed. For You keeps its own Refresh.
 **Done when:** Seen swaps one card (anon and signed-in); Get 5 new lands on 5 verified cards with none of the previous five; a non-owner gets 403; `make check` passes.
 
+## F-16 · Desktop web layout
+
+**Phase 5 · Depends on: F-15 · Spec: CLAUDE.md rule 5**
+Every screen gets a real desktop layout from `lg:` (≥1024px) while the 390px phone view stays pixel-identical. Shared `PAGE` column (`src/components/ui/page.ts`) matching a `max-w-6xl` nav with icons + an "I feel like…" CTA; two-column home hero; wizard widens to `max-w-3xl` with three-up options, a brand bar from `md:` and number-key / Esc shortcuts (driven by `step.options`, rule 3); results keep the full reason — featured #1 card plus a 2×2 grid, bigger posters; profile gets a sticky aside (identity, counts, taste summary); movie detail is a two-column `max-w-4xl` dialog/page; login sits in a card.
+**Done when:** home, wizard, results, For You, profile, detail and login use the width at 1280/1440 with no floating phone column; 390px renders as before; keys 1–9 pick and Esc goes back in the wizard; `make check` passes.

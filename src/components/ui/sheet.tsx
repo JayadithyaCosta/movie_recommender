@@ -51,7 +51,7 @@ export function Sheet({ label, children }: { label: string; children: React.Reac
         initial={reduceMotion ? { opacity: 0 } : { y: 48, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", damping: 30, stiffness: 320 }}
-        className="relative max-h-[92dvh] w-full overflow-y-auto overscroll-contain rounded-t-3xl bg-background ring-1 ring-white/10 focus:outline-none md:max-w-2xl md:rounded-3xl"
+        className="relative max-h-[92dvh] w-full overflow-y-auto overscroll-contain rounded-t-3xl bg-background ring-1 ring-white/10 focus:outline-none md:max-w-2xl md:rounded-3xl lg:max-w-4xl"
       >
         <div className="sticky top-0 z-10 flex justify-between p-3">
           <span aria-hidden="true" className="mx-auto mt-1 h-1.5 w-10 rounded-full bg-white/25 md:hidden" />

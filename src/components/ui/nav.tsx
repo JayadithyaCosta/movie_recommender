@@ -53,8 +53,11 @@ export function Nav() {
     <>
       {/* Desktop / tablet */}
       <header className="sticky top-0 z-30 hidden border-b border-white/5 bg-background/80 backdrop-blur md:block">
-        <nav aria-label="Main" className="mx-auto flex h-16 max-w-5xl items-center justify-between px-6">
-          <Link href="/" className="text-sm font-semibold tracking-[0.2em] text-accent uppercase">
+        <nav aria-label="Main" className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-6 lg:px-8">
+          <Link
+            href="/"
+            className="mr-auto rounded text-sm font-semibold tracking-[0.2em] text-accent uppercase focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
+          >
             Movie Recs
           </Link>
           <ul className="flex items-center gap-1">
@@ -69,12 +72,19 @@ export function Nav() {
                       active ? "bg-surface text-foreground" : "text-muted hover:text-foreground"
                     }`}
                   >
+                    <span className="hidden lg:contents [&>svg]:size-5">{tab.icon}</span>
                     {tab.label}
                   </Link>
                 </li>
               );
             })}
           </ul>
+          <Link
+            href="/discover"
+            className="min-h-tap hidden items-center rounded-full bg-accent px-5 text-sm font-semibold text-accent-foreground transition-transform focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none active:scale-[0.98] lg:flex"
+          >
+            I feel like…
+          </Link>
         </nav>
       </header>
 

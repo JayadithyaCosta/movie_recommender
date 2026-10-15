@@ -80,9 +80,9 @@ export function ResultsList({ sessionId, picks: initial, signedIn, canSwap }: Re
 
   return (
     <>
-      <ol className="grid gap-3 md:grid-cols-2 md:gap-4 xl:grid-cols-5">
+      <ol className="grid gap-3 md:grid-cols-2 md:gap-4 lg:gap-5">
         {picks.map((pick, index) => (
-          <li key={pick.rank} className={`relative ${index === 0 ? "md:col-span-2 xl:col-span-1" : ""}`}>
+          <li key={pick.rank} className={`relative ${index === 0 ? "md:col-span-2" : ""}`}>
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={pick.movie.id}
@@ -97,6 +97,7 @@ export function ResultsList({ sessionId, picks: initial, signedIn, canSwap }: Re
                   reason={pick.reason}
                   movie={pick.movie}
                   priority={index < 2}
+                  featured={index === 0}
                   actions={
                     <FeedbackBar
                       movieId={pick.movie.id}

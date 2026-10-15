@@ -45,23 +45,38 @@ export function MovieDetail({
 
   return (
     <article className="flex flex-col">
-      <div className="relative aspect-video w-full overflow-hidden bg-surface">
+      <div className="relative aspect-video w-full overflow-hidden bg-surface lg:aspect-[21/9]">
         {backdrop ? (
-          <Image src={backdrop} alt="" fill sizes="(min-width: 768px) 672px, 100vw" className="object-cover" priority />
+          <Image src={backdrop} alt="" fill sizes="(min-width: 1024px) 896px, (min-width: 768px) 672px, 100vw" className="object-cover" priority />
         ) : null}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
       </div>
 
-      <div className="relative -mt-16 flex flex-col gap-5 px-5 pb-8 sm:px-6">
-        <div className="flex items-end gap-4">
-          <Poster path={movie.posterPath} title={movie.title} sizes="112px" className="w-24 shrink-0 shadow-2xl sm:w-28" />
-          <div className="min-w-0 space-y-1 pb-1">
+      <div className="relative -mt-16 flex flex-col gap-5 px-5 pb-8 sm:px-6 lg:-mt-24 lg:grid lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-x-8 lg:px-8 lg:pb-10">
+        <div className="flex items-end gap-4 lg:row-span-6 lg:flex-col lg:items-stretch lg:gap-4 lg:self-start">
+          <Poster
+            path={movie.posterPath}
+            title={movie.title}
+            sizes="(min-width: 1024px) 208px, 112px"
+            className="w-24 shrink-0 shadow-2xl sm:w-28 lg:w-full"
+          />
+          <div className="min-w-0 space-y-1 pb-1 lg:hidden">
             <h1 className="text-2xl leading-tight font-semibold text-balance sm:text-3xl">{movie.title}</h1>
             <MovieMeta year={movie.year} runtime={movie.runtime} rating={movie.rating} />
           </div>
+          <div className="hidden lg:block [&>*]:w-full">
+            <SaveButton movieId={movie.id} initialSaved={state.saved} signedIn={signedIn} />
+          </div>
         </div>
 
-        <div>
+        {/* Desktop title sits beside the poster column; the phone one above is
+            `lg:hidden`, so exactly one h1 is ever rendered visible. */}
+        <div className="hidden space-y-1 lg:block lg:pt-24">
+          <h1 className="text-4xl leading-tight font-semibold text-balance">{movie.title}</h1>
+          <MovieMeta year={movie.year} runtime={movie.runtime} rating={movie.rating} />
+        </div>
+
+        <div className="lg:hidden">
           <SaveButton movieId={movie.id} initialSaved={state.saved} signedIn={signedIn} />
         </div>
 

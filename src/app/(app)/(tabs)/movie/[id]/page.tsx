@@ -17,7 +17,7 @@ export default async function MoviePage({ params }: Params) {
   if (!detail) notFound();
 
   return (
-    <main className="mx-auto w-full max-w-2xl md:pt-6">
+    <main className="mx-auto w-full max-w-2xl md:pt-6 lg:max-w-4xl lg:pt-10">
       <div className="overflow-hidden md:rounded-3xl md:ring-1 md:ring-white/5">
         <MovieDetail {...detail} />
       </div>

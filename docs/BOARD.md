@@ -23,6 +23,8 @@ Task-level tracking for the features in `docs/FEATURES.md`. Rules:
 - [x] F-12 Failure modes & rate limiting
 - [ ] F-13 PWA & ship polish
 - [x] F-14 Rec UX boosts
+- [x] F-15 Seen-swap & "None of these"
+- [x] F-16 Desktop web layout
 
 ---
 
@@ -143,3 +145,13 @@ Task-level tracking for the features in `docs/FEATURES.md`. Rules:
 - [x] 👁 Seen swaps the card in place (Template D "seen" variant, anon allowed)
 - [x] "None of these? Get 5 new" (`mode: "AGAIN"`, excludes current five, skips shared cache, owner only)
 - [x] **Acceptance** (FEATURES F-15)
+
+## F-16 · Desktop web layout
+
+- [x] Shared `PAGE` column + desktop nav (icons, "I feel like…" CTA, `max-w-6xl`)
+- [x] Home two-column hero from `lg:`
+- [x] Wizard: `lg:max-w-3xl`, three-up options, brand bar, 1–9 / Esc shortcuts
+- [x] Results / For You: featured #1 + 2×2 grid, full reasons, bigger posters
+- [x] Profile sticky aside (identity, counts, taste) + wider watchlist/history grids
+- [x] Movie detail two-column `max-w-4xl` dialog and page; login card
+- [x] **Acceptance** (FEATURES F-16) <!-- verified at 1910px viewport and 390px iframes; keys 1 / Esc in wizard -->

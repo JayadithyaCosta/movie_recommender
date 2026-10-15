@@ -31,7 +31,7 @@ export function WizardSummary({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.22, ease: "easeOut" }}
-      className="flex flex-1 flex-col gap-6"
+      className="flex flex-1 flex-col gap-6 lg:max-w-xl"
     >
       <div className="space-y-2">
         <h1 className="text-3xl leading-tight font-semibold text-balance">That&apos;s enough.</h1>
