@@ -32,16 +32,17 @@ Node version is pinned in `.nvmrc` (Node 22). Package manager is pnpm via corepa
 `make help` lists everything. The Makefile is the source of truth for project commands —
 use it rather than raw `pnpm`/`prisma` invocations.
 
-| Target                                            | Does                                          |
-| ------------------------------------------------- | --------------------------------------------- |
-| `make dev` / `make build` / `make start`          | Next.js dev server / prod build / serve build |
-| `make check`                                      | `lint` + `typecheck` (pre-commit gate)        |
-| `make db-up` / `db-down` / `db-logs` / `db-reset` | Dockerized Postgres lifecycle                 |
-| `make migrate-dev NAME=…` / `make migrate`        | Prisma migrations (dev / deploy)              |
-| `make generate` / `make studio` / `make seed`     | Prisma client, Studio, demo data              |
-| `make llm-smoke` / `tmdb-smoke` / `rec-smoke`     | Live checks: LLM, TMDB cache, full pipeline   |
-| `make lighthouse URL=…`                           | Mobile Lighthouse audit of a running server   |
-| `make add PKG="…"`                                | Add dependencies (`DEV=1` for dev deps)       |
+| Target                                            | Does                                                                    |
+| ------------------------------------------------- | ----------------------------------------------------------------------- |
+| `make dev` / `make build` / `make start`          | Next.js dev server / prod build / serve build                           |
+| `make check`                                      | `lint` + `typecheck` (pre-commit gate)                                  |
+| `make db-up` / `db-down` / `db-logs` / `db-reset` | Dockerized Postgres lifecycle                                           |
+| `make migrate-dev NAME=…` / `make migrate`        | Prisma migrations (dev / deploy)                                        |
+| `make generate` / `make studio` / `make seed`     | Prisma client, Studio, demo data                                        |
+| `make llm-smoke` / `tmdb-smoke` / `rec-smoke`     | Live checks: LLM, TMDB cache, full pipeline                             |
+| `make lighthouse URL=…`                           | Mobile Lighthouse audit of a running server                             |
+| `make add PKG="…"`                                | Add dependencies (`DEV=1` for dev deps)                                 |
+| `make deploy` / `deploy-preview` / `migrate-prod` | Vercel deploys + prod migrations (see [docs/DEPLOY.md](docs/DEPLOY.md)) |
 
 ## Docs
 

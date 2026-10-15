@@ -94,6 +94,31 @@ lighthouse: ## Lighthouse mobile audit of a running server (URL=..., default hom
 	mkdir -p .lighthouse
 	$(PM) dlx lighthouse@12 $(or $(URL),http://localhost:3000/) --form-factor=mobile --only-categories=performance,accessibility,best-practices,seo --chrome-flags="--headless=new" --output=json --output=html --output-path=./.lighthouse/report --quiet
 
+.PHONY: vercel-link
+vercel-link: ## Log in to Vercel and link this repo to a project
+	$(PM) dlx vercel@latest login
+	$(PM) dlx vercel@latest link
+
+.PHONY: vercel-env-pull
+vercel-env-pull: ## Pull production env vars into .env.production.local (gitignored)
+	$(PM) dlx vercel@latest env pull .env.production.local --environment=production
+
+.PHONY: migrate-prod
+migrate-prod: ## Apply migrations to the production DB (uses DIRECT_URL, Neon's non-pooled host, when set)
+	set -a && . ./.env.production.local && set +a && DATABASE_URL="$${DIRECT_URL:-$$DATABASE_URL}" $(PM) exec prisma migrate deploy
+
+.PHONY: migrate-status-prod
+migrate-status-prod: ## Show production migration status over the pooled DATABASE_URL (app's path)
+	set -a && . ./.env.production.local && set +a && $(PM) exec prisma migrate status
+
+.PHONY: deploy-preview
+deploy-preview: ## Deploy a Vercel preview build
+	$(PM) dlx vercel@latest deploy
+
+.PHONY: deploy
+deploy: ## Deploy to Vercel production
+	$(PM) dlx vercel@latest deploy --prod
+
 .PHONY: check
 check: lint typecheck ## Lint + typecheck (pre-commit gate)
 
