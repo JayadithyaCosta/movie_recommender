@@ -277,6 +277,7 @@ function fallbackReason(answers: WizardAnswers): (movie: Movie, index: number) =
     .filter((label) => label !== "Surprise me")
     .join(", ")
     .toLowerCase();
+  if (!path) return () => "A widely loved pick — a safe bet for tonight.";
   return (_movie, index) =>
     (FALLBACK_REASONS[index % FALLBACK_REASONS.length] ?? FALLBACK_REASONS[0]!)(path);
 }
@@ -337,6 +338,24 @@ export async function recommendWizard(
   });
   console.log(`[recommend] wizard session ${sessionId} via ${source}`);
   return { sessionId, source };
+}
+
+// ---------- Surprise me (F-14) ----------
+
+/**
+ * One tap from home: a synthetic wizard path, so it reuses the whole pipeline
+ * — taste block when signed in, fallback, exclusions. Keyed by day, so
+ * anonymous visitors share one cached batch per day.
+ */
+export async function recommendSurprise(viewer: Viewer): Promise<RecommendResult> {
+  const day = new Date().toISOString().slice(0, 10);
+  const answers: WizardAnswers = {
+    steps: [{ stepId: "surprise", optionId: day, label: "Surprise me" }],
+    byStep: { surprise: day },
+    readablePath:
+      "Surprise me — a varied mix across genres and decades: crowd-pleasers plus a hidden gem",
+  };
+  return recommendWizard(answers, viewer);
 }
 
 // ---------- For You ----------

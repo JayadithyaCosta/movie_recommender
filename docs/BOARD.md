@@ -22,6 +22,7 @@ Task-level tracking for the features in `docs/FEATURES.md`. Rules:
 - [x] F-11 For You feed
 - [x] F-12 Failure modes & rate limiting
 - [ ] F-13 PWA & ship polish
+- [x] F-14 Rec UX boosts
 
 ---
 
@@ -129,3 +130,11 @@ Task-level tracking for the features in `docs/FEATURES.md`. Rules:
 - [ ] `make seed` demo data
 - [ ] Lighthouse mobile: perf ≥ 90 on results, PWA pass
 - [ ] **Acceptance** (FEATURES F-13)
+
+## F-14 · Rec UX boosts
+
+- [x] Sub-genre step for every genre (config-only, TMDB hints verified)
+- [x] Surprise me on home (`mode: "SURPRISE"`, daily shared cache when anonymous)
+- [x] ✕ swaps any results card in place (owner / cookie-vouched only)
+- [x] **Acceptance** (FEATURES F-14)
+

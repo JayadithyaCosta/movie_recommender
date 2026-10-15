@@ -195,7 +195,8 @@ export function isCompletePath(tree: StepTree, picks: readonly WizardPick[]): bo
 export function mergeTmdbHints(tree: StepTree, answers: WizardAnswers): TmdbHint {
   const merged: TmdbHint = {};
   for (const answer of answers.steps) {
-    const hint = getOption(tree, answer.stepId, answer.optionId).tmdb;
+    // Synthetic paths (Surprise me) carry steps the tree doesn't know — no hints.
+    const hint = tree.steps[answer.stepId]?.options.find((o) => o.id === answer.optionId)?.tmdb;
     if (!hint) continue;
     if (hint.genreIds) merged.genreIds = [...(merged.genreIds ?? []), ...hint.genreIds];
     if (hint.keywordIds) merged.keywordIds = [...(merged.keywordIds ?? []), ...hint.keywordIds];

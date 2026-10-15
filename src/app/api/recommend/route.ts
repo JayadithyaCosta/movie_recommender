@@ -5,6 +5,7 @@ import { rememberAnonSession } from "@/lib/anon-cookie";
 import {
   CooldownError,
   recommendForYou,
+  recommendSurprise,
   recommendWizard,
   RecommendUnavailableError,
   type RecommendResult,
@@ -52,8 +53,10 @@ export async function POST(request: Request) {
         result = await recommendForYou(userId);
         break;
       }
-      default:
-        return badRequest();
+      case "SURPRISE": {
+        result = await recommendSurprise(viewer);
+        break;
+      }
     }
 
     if (!userId) await rememberAnonSession(result.sessionId);

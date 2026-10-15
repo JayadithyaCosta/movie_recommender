@@ -81,3 +81,13 @@ Friendly error screens for LLM-down (answers preserved, retry) and TMDB-down (se
 **Phase 5 · Depends on: F-06, F-11 · Spec: SPEC §8 context**
 `next-pwa`, manifest + icons, loading states on every route, seed script, Lighthouse mobile: installable + perf ≥ 90 on results.
 **Done when:** installs to a phone home screen; Lighthouse targets met; `make seed` produces a demo-able app.
+
+## F-14 · Rec UX boosts
+
+**Phase 5 · Depends on: F-05, F-11 · Spec: SPEC §2.1, §4.1**
+Three additions beyond the v1 spec that make getting a good set of five faster:
+(1) every genre gets a sub-genre step (config only, `src/config/steps.ts`, with verified TMDB hints), so every path is 4 taps;
+(2) **Surprise me** on home — zero questions, five picks (taste-aware when signed in, a shared daily batch when anonymous);
+(3) ✕ on *any* results card swaps that card in place (Template D), not just in For You — the session owner or the anonymous browser that created it only.
+**Done when:** each genre shows its sub-step; Surprise me lands on 5 verified cards (second anonymous call same day is a cache hit); ✕ on a wizard result swaps one card, and a non-owner gets 403.
+

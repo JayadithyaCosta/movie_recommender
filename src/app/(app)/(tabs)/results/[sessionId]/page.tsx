@@ -30,13 +30,18 @@ export default async function ResultsPage({ params }: Params) {
   );
 
   const answers = session.answers;
-  const chips = answers?.steps.map((step) => step.label) ?? [];
+  // Surprise sessions carry a synthetic step; the eyebrow already says so.
+  const chips = answers?.byStep.surprise ? [] : (answers?.steps.map((step) => step.label) ?? []);
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 pt-6 pb-8 md:max-w-3xl md:px-6 md:pt-10 xl:max-w-6xl">
       <header className="space-y-3 px-2">
         <p className="text-sm tracking-[0.2em] text-accent uppercase">
-          {session.type === "FOR_YOU" ? "For you" : "Your five for tonight"}
+          {session.type === "FOR_YOU"
+            ? "For you"
+            : answers?.byStep.surprise
+              ? "Surprise picks"
+              : "Your five for tonight"}
         </p>
         {chips.length > 0 ? (
           <ul className="flex flex-wrap gap-2" aria-label="Your picks">

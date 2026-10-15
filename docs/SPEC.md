@@ -9,7 +9,7 @@ Users answer a few taps ("what do you feel like right now") OR open a personaliz
 ### 2.1 Mood wizard (`/discover`) — everyone
 
 - Full-screen step cards from the tree in `src/config/steps.ts`. Each step: question + 2–6 large option tiles. Progress dots on top, back button, framer-motion slide transitions.
-- Branching: e.g. Horror → {Ghosts & hauntings, Demons & possession, Slashers, Psychological}. Every branch converges on 2 shared final steps: **era** (Classics / 90s–00s / Modern / Surprise me) and **pacing** (Slow-burn / Balanced / Intense).
+- Branching: every genre has a sub-genre step, e.g. Horror → {Ghosts & hauntings, Demons & possession, Slashers, Psychological}, Comedy → {Feel-good, Rom-com, Dark comedy, Absurd & satire} (F-14). Every branch converges on 2 shared final steps: **era** (Classics / 90s–00s / Modern / Surprise me) and **pacing** (Slow-burn / Balanced / Intense).
 - Total taps: 3–4. The summary screen carries an optional free-text field ("Anything else?", max 200 chars) for constraints the tiles can't express — "nothing with jump scares", "under 2 hours". Empty by default; it never blocks the tap-only path.
 - On completion → `POST /api/recommend` → redirect to `/results/[sessionId]`.
 
