@@ -170,3 +170,12 @@ export const StoredAnswersSchema = z.object({
 });
 
 export type StoredAnswersShape = z.infer<typeof StoredAnswersSchema>;
+
+/** One tap on a card action. `on: false` undoes it (unsave / clear the signal). */
+export const FeedbackBody = z.object({
+  movieId: z.number().int().positive(),
+  signal: z.enum(["LOVED", "SEEN", "NOT_FOR_ME", "SAVED"]),
+  on: z.boolean(),
+});
+
+export type FeedbackBody = z.infer<typeof FeedbackBody>;

@@ -15,8 +15,8 @@ Task-level tracking for the features in `docs/FEATURES.md`. Rules:
 - [x] F-04 TMDB integration & movie cache
 - [x] F-05 Recommendation pipeline
 - [x] F-06 Results & movie detail
-- [ ] F-07 Auth & session claiming
-- [ ] F-08 Profile page
+- [x] F-07 Auth & session claiming
+- [x] F-08 Profile page
 - [ ] F-09 Feedback signals
 - [ ] F-10 Taste profile engine
 - [ ] F-11 For You feed
@@ -82,14 +82,14 @@ Task-level tracking for the features in `docs/FEATURES.md`. Rules:
 - [x] Auth.js v5 + Prisma adapter; Google + Resend magic link
 - [x] Login/logout UI usable at 390px
 - [x] Anonymous session claiming on first login
-- [ ] **Acceptance** (FEATURES F-07)
+- [x] **Acceptance** (FEATURES F-07)
 
 ## F-08 · Profile page
 
-- [ ] History grouped by date; watchlist grid
-- [ ] Save/unsave from movie cards (round-trip)
-- [ ] Sign out
-- [ ] **Acceptance** (FEATURES F-08)
+- [x] History grouped by date; watchlist grid
+- [x] Save/unsave from movie cards (round-trip)
+- [x] Sign out
+- [x] **Acceptance** (FEATURES F-08)
 
 ## F-09 · Feedback signals
 

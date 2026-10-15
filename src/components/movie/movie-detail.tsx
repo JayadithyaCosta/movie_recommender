@@ -6,6 +6,7 @@ import type { WatchProviders } from "@/lib/tmdb";
 
 import { MovieMeta } from "./movie-meta";
 import { Poster } from "./poster";
+import { SaveButton } from "./save-button";
 
 type ProviderGroup = { label: string; items: NonNullable<WatchProviders["flatrate"]> };
 
@@ -30,10 +31,14 @@ export function MovieDetail({
   movie,
   providers,
   providersFailed = false,
+  signedIn,
+  state,
 }: {
   movie: MovieView;
   providers: WatchProviders | null;
   providersFailed?: boolean;
+  signedIn: boolean;
+  state: { saved: boolean };
 }) {
   const backdrop = backdropUrl(movie.backdropPath);
   const providerGroups = groups(providers);
@@ -54,6 +59,10 @@ export function MovieDetail({
             <h1 className="text-2xl leading-tight font-semibold text-balance sm:text-3xl">{movie.title}</h1>
             <MovieMeta year={movie.year} runtime={movie.runtime} rating={movie.rating} />
           </div>
+        </div>
+
+        <div>
+          <SaveButton movieId={movie.id} initialSaved={state.saved} signedIn={signedIn} />
         </div>
 
         {movie.genres.length > 0 ? (

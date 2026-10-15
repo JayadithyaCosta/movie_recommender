@@ -3,7 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { MovieCard } from "@/components/movie/movie-card";
+import { SaveButton } from "@/components/movie/save-button";
+import { getViewerMovieStates } from "@/lib/feedback";
 import { getResultsSession } from "@/lib/sessions";
+import { getUserId } from "@/lib/viewer";
 
 type Params = { params: Promise<{ sessionId: string }> };
 
@@ -14,6 +17,12 @@ export default async function ResultsPage({ params }: Params) {
   const { sessionId } = await params;
   const session = await getResultsSession(sessionId);
   if (!session) notFound();
+
+  const userId = await getUserId();
+  const states = await getViewerMovieStates(
+    userId,
+    session.picks.map((pick) => pick.movie.id),
+  );
 
   const answers = session.answers;
   const chips = answers?.steps.map((step) => step.label) ?? [];
@@ -48,7 +57,19 @@ export default async function ResultsPage({ params }: Params) {
       <ol className="grid gap-3 md:grid-cols-2 md:gap-4 xl:grid-cols-5">
         {session.picks.map((pick, index) => (
           <li key={pick.recId} className={index === 0 ? "md:col-span-2 xl:col-span-1" : undefined}>
-            <MovieCard rank={pick.rank} reason={pick.reason} movie={pick.movie} priority={index < 2} />
+            <MovieCard
+              rank={pick.rank}
+              reason={pick.reason}
+              movie={pick.movie}
+              priority={index < 2}
+              actions={
+                <SaveButton
+                  movieId={pick.movie.id}
+                  initialSaved={states[pick.movie.id]?.saved ?? false}
+                  signedIn={userId !== null}
+                />
+              }
+            />
           </li>
         ))}
       </ol>

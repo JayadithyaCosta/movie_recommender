@@ -1,12 +1,16 @@
 import { headers } from "next/headers";
 
+import { getViewerMovieStates, type ViewerMovieState } from "@/lib/feedback";
 import { toMovieView, type MovieView } from "@/lib/movie-view";
 import { getMovie, getWatchProviders, regionFromAcceptLanguage, type WatchProviders } from "@/lib/tmdb";
+import { getUserId } from "@/lib/viewer";
 
 export type MovieDetailData = {
   movie: MovieView;
   providers: WatchProviders | null;
   providersFailed: boolean;
+  signedIn: boolean;
+  state: ViewerMovieState;
 };
 
 /**
@@ -24,10 +28,14 @@ export async function loadMovieDetail(id: number): Promise<MovieDetailData | nul
     return null;
   }
 
+  const userId = await getUserId();
+  const state = (await getViewerMovieStates(userId, [id]))[id] ?? { saved: false, signal: null };
+  const base = { movie: toMovieView(movie), signedIn: userId !== null, state };
+
   const region = regionFromAcceptLanguage((await headers()).get("accept-language"));
   try {
-    return { movie: toMovieView(movie), providers: await getWatchProviders(id, region), providersFailed: false };
+    return { ...base, providers: await getWatchProviders(id, region), providersFailed: false };
   } catch {
-    return { movie: toMovieView(movie), providers: null, providersFailed: true };
+    return { ...base, providers: null, providersFailed: true };
   }
 }
