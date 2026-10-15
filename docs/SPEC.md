@@ -64,7 +64,7 @@ Each movie card shows three one-tap actions + save:
 
 ## 6. Auth & profile
 
-- Auth.js v5, Prisma adapter, providers: Google + Resend email magic link.
+- Auth.js v5, Prisma adapter, providers: Google (production); email magic link in dev only, printed to the server log.
 - `/profile`: saved watchlist, recommendation history (sessions grouped by date), taste summary, sign out.
 
 ## 7. Failure modes (must handle)

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { auth, authProviders, signIn } from "@/auth";
@@ -26,7 +27,7 @@ export default async function LoginPage({ searchParams }: Search) {
     "use server";
     const email = String(formData.get("email") ?? "").trim();
     if (!email) return;
-    await signIn("resend", { email, redirectTo: callbackUrl });
+    await signIn("email", { email, redirectTo: callbackUrl });
   }
 
   async function withGoogle() {
@@ -40,15 +41,13 @@ export default async function LoginPage({ searchParams }: Search) {
         <span aria-hidden="true" className="text-6xl">
           📬
         </span>
-        <h1 className="text-3xl font-semibold">Check your inbox</h1>
+        <h1 className="text-3xl font-semibold">Check the server log</h1>
         <p className="text-base text-muted">
-          We sent you a sign-in link. Open it on this device and you&apos;re in.
+          Your sign-in link is ready. Open it on this device and you&apos;re in.
         </p>
-        {authProviders.devEmail ? (
-          <p className="rounded-2xl bg-surface px-4 py-3 text-sm text-muted ring-1 ring-white/5">
-            Dev mode: no email is sent — the link is printed in the server log.
-          </p>
-        ) : null}
+        <p className="rounded-2xl bg-surface px-4 py-3 text-sm text-muted ring-1 ring-white/5">
+          Dev mode: no email is sent — the link is printed in the server log.
+        </p>
       </main>
     );
   }
@@ -92,7 +91,7 @@ export default async function LoginPage({ searchParams }: Search) {
           </form>
         ) : null}
 
-        {authProviders.google && authProviders.email ? (
+        {authProviders.google && authProviders.devEmail ? (
           <div className="flex items-center gap-3 text-xs text-muted" aria-hidden="true">
             <span className="h-px flex-1 bg-white/10" />
             or
@@ -100,7 +99,7 @@ export default async function LoginPage({ searchParams }: Search) {
           </div>
         ) : null}
 
-        {authProviders.email ? (
+        {authProviders.devEmail ? (
           <form action={withEmail} className="flex flex-col gap-3">
             <label htmlFor="email" className="text-sm font-medium">
               Email
@@ -124,12 +123,22 @@ export default async function LoginPage({ searchParams }: Search) {
           </form>
         ) : null}
 
-        {!authProviders.google && !authProviders.email ? (
+        {!authProviders.google && !authProviders.devEmail ? (
           <p className="text-sm text-muted">Sign-in isn&apos;t configured on this server yet.</p>
         ) : null}
       </div>
 
-      <p className="text-center text-xs text-muted">No password. No spam. Just movies.</p>
+      <p className="text-center text-xs text-muted">
+        No password. No spam. Just movies.
+        <br />
+        <Link href="/privacy" className="underline">
+          Privacy
+        </Link>{" "}
+        ·{" "}
+        <Link href="/terms" className="underline">
+          Terms
+        </Link>
+      </p>
     </main>
   );
 }

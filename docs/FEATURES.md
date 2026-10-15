@@ -43,7 +43,7 @@ Data-driven step tree in `src/config/steps.ts` (Horror w/ 4 sub-branches, Sci-Fi
 ## F-07 · Auth & session claiming
 
 **Phase 3 · Depends on: F-01 · Spec: SPEC §6, §3**
-Auth.js v5 (Google + Resend magic link), Prisma adapter. On first login, claim anonymous `RecSession`s from cookie.
+Auth.js v5 (Google; email magic link in dev only, logged to console), Prisma adapter. On first login, claim anonymous `RecSession`s from cookie.
 **Done when:** login works at 390px; a pre-login wizard session appears in the user's history post-signup.
 
 ## F-08 · Profile page
@@ -103,3 +103,4 @@ Three additions beyond the v1 spec that make getting a good set of five faster:
 **Phase 5 · Depends on: F-15 · Spec: CLAUDE.md rule 5**
 Every screen gets a real desktop layout from `lg:` (≥1024px) while the 390px phone view stays pixel-identical. Shared `PAGE` column (`src/components/ui/page.ts`) matching a `max-w-6xl` nav with icons + an "I feel like…" CTA; two-column home hero; wizard widens to `max-w-3xl` with three-up options, a brand bar from `md:` and number-key / Esc shortcuts (driven by `step.options`, rule 3); results keep the full reason — featured #1 card plus a 2×2 grid, bigger posters; profile gets a sticky aside (identity, counts, taste summary); movie detail is a two-column `max-w-4xl` dialog/page; login sits in a card.
 **Done when:** home, wizard, results, For You, profile, detail and login use the width at 1280/1440 with no floating phone column; 390px renders as before; keys 1–9 pick and Esc goes back in the wizard; `make check` passes.
+

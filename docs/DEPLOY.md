@@ -19,11 +19,10 @@ Everything here is on a free tier. Order matters: DB → Vercel → domain → C
    | ------------------------------------------- | ----------------------------------------------- |
    | `DATABASE_URL`                              | Neon pooled URL                                 |
    | `AUTH_SECRET`                               | `openssl rand -base64 32` (new, not the dev one) |
-   | `AUTH_URL`                                  | `https://<your-domain>` (after step 4)          |
+   | `AUTH_URL`                                  | optional — `https://<your-domain>` (step 5)     |
    | `GEMINI_API_KEY`                            | AI Studio key                                   |
    | `TMDB_READ_TOKEN`                           | TMDB v4 read token                              |
    | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET`     | Google OAuth client (step 6)                    |
-   | `AUTH_RESEND_KEY` / `AUTH_EMAIL_FROM`       | optional — see step 6                           |
 
 3. Locally: `make vercel-link`, `make vercel-env-pull`, `make migrate-prod` (applies
    `prisma/migrations` to Neon). Re-run `make migrate-prod` whenever a migration is added.
@@ -66,21 +65,46 @@ Cheapest real TLD if free ones get flaky: Cloudflare Registrar (`.com` ~$10/yr a
 
 ## 5. Point the app at the domain
 
-Set `AUTH_URL=https://<your-domain>` in Vercel and redeploy.
+Optional. `src/auth.ts` sets `trustHost: true`, so Auth.js derives URLs from the request host
+and works on `*.vercel.app` with `AUTH_URL` unset. Set `AUTH_URL=https://<your-domain>` (no
+trailing slash) once a custom domain is live, to pin OAuth callbacks to it, then redeploy. Never
+copy the dev value (`http://localhost:3000`) — callbacks would point there.
 
 ## 6. Auth providers
 
-- **Google**: Google Cloud Console → OAuth client (Web) → Authorized redirect URI
-  `https://<your-domain>/api/auth/callback/google` (add the `.vercel.app` one too if you use
-  it). Put the id/secret in Vercel.
-- **Magic link** (optional): in production the console fallback is off, so email login only
-  appears with `AUTH_RESEND_KEY`. Resend's test sender (`onboarding@resend.dev`) only delivers
-  to your own Resend account email; to mail anyone, verify the domain in Resend (it gives
-  TXT/MX records — add them in Cloudflare, DNS only) and set
-  `AUTH_EMAIL_FROM="Movie Recs <login@<your-domain>>"`.
+- **Google** (free):
+  1. console.cloud.google.com → new project.
+  2. APIs & Services → OAuth consent screen → External; app name, support email; scopes
+     `openid`, `email`, `profile` only. **Publish app** (basic scopes need no review) — while
+     in Testing, only listed test users can sign in.
+  3. Credentials → Create credentials → OAuth client ID → Web application.
+     Authorized redirect URIs, one per host:
+     `https://<your-domain>/api/auth/callback/google`,
+     `https://<project>.vercel.app/api/auth/callback/google`,
+     `http://localhost:3000/api/auth/callback/google` (dev).
+  4. Copy client id/secret → Vercel env `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` (Production)
+     and local `.env`. Redeploy.
+- Production is Google-only. The email magic link exists in dev only (printed to the server
+  log, never sent), so no email provider or domain is needed.
 
 ## 7. Smoke test
 
 - Wizard logged-out → 5 results with posters.
 - Google login → For You loads.
 - Phone → Add to Home Screen (closes F-13 Acceptance's pending item).
+
+## Troubleshooting
+
+- **`/login` says "Sign-in isn't configured on this server yet."** — no provider env reaches the
+  running deployment. `/login` reads env per request, so this means the deployment itself lacks
+  `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET`. Check, in order:
+  1. Redeployed after adding the var? Vercel env changes only apply to **new** deployments.
+  2. Var scoped to **Production** (not only Preview/Development)?
+  3. Viewing the project domain, not a per-deployment URL (`<project>-<hash>-<team>.vercel.app`)?
+     Those stay pinned to the env they were built with.
+  4. Names exact — `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, no spaces.
+- **Google `redirect_uri_mismatch`** — the exact callback URL
+  (`https://<host>/api/auth/callback/google`) must be listed in the OAuth client's Authorized
+  redirect URIs; each host (custom domain, `.vercel.app`) needs its own entry.
+- **Google "access blocked" / only some accounts work** — consent screen is in Testing mode:
+  only listed test users can sign in. Publish the app (basic scopes need no Google review).

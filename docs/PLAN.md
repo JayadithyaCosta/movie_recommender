@@ -21,7 +21,7 @@ Work strictly phase by phase. Each phase must meet its acceptance criteria (`mak
 
 ## Phase 3 — Auth + profile basics
 
-- Auth.js v5 (Google + Resend magic link), `/profile` with recommendation history and saved watchlist, save button on cards, anonymous session claiming on first login.
+- Auth.js v5 (Google; email magic link in dev only, logged to console), `/profile` with recommendation history and saved watchlist, save button on cards, anonymous session claiming on first login.
 - ✅ Login works on mobile viewport; pre-login wizard session appears in history after signup.
 
 ## Phase 4 — Feedback + taste profile + For You

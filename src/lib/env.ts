@@ -50,9 +50,6 @@ const envSchema = z.object({
   AUTH_URL: optionalSecret, // F-07
   AUTH_GOOGLE_ID: optionalSecret, // F-07
   AUTH_GOOGLE_SECRET: optionalSecret, // F-07
-  AUTH_RESEND_KEY: optionalSecret, // F-07 — unset in dev: magic links are logged to the console
-  /** Sender for magic-link emails; Resend's shared test sender works without a domain. */
-  AUTH_EMAIL_FROM: z.string().default("Movie Recs <onboarding@resend.dev>"),
   REDIS_URL: optionalSecret, // optional forever — pathHash cache lives in Postgres by default
 });
 

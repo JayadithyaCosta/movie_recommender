@@ -18,9 +18,9 @@ make seed                 # optional: demo user with history, ratings, watchlist
 make dev                  # http://localhost:3000
 ```
 
-**Demo login (dev):** with no `AUTH_RESEND_KEY`, `/login` prints the magic link to the
-server log — sign in as `demo@movierecs.test` after `make seed`. Google sign-in appears
-once `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET` are set.
+**Demo login (dev):** `/login` offers an email magic link that is printed to the server
+log (never sent) — sign in as `demo@movierecs.test` after `make seed`. Production is
+Google-only; it appears once `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET` are set.
 
 **No LLM key?** The app still works: if Gemini is unavailable, picks come from TMDB
 `/discover` driven by the wizard config (still 100% TMDB-verified).
