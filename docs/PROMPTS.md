@@ -96,6 +96,7 @@ USER:
 ```
 Their taste: {tasteSummary}
 They rejected: "{rejectedTitle}" — avoid anything closely similar to it.
+  (on 👁 Seen instead: They've already watched: "{rejectedTitle}" — suggest something else in the same spirit they likely haven't seen.)
 Current batch (do not duplicate): {currentBatchTitles}
 EXCLUDE: {excludedTitles}
 ```

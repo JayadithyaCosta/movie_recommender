@@ -4,6 +4,8 @@ import { STEP_TREE } from "@/config/steps";
 import { rememberAnonSession } from "@/lib/anon-cookie";
 import {
   CooldownError,
+  NotAllowedError,
+  recommendAgain,
   recommendForYou,
   recommendSurprise,
   recommendWizard,
@@ -57,11 +59,18 @@ export async function POST(request: Request) {
         result = await recommendSurprise(viewer);
         break;
       }
+      case "AGAIN": {
+        result = await recommendAgain(body.data.sessionId, viewer);
+        break;
+      }
     }
 
     if (!userId) await rememberAnonSession(result.sessionId);
     return NextResponse.json(result);
   } catch (error) {
+    if (error instanceof NotAllowedError) {
+      return NextResponse.json({ error: "forbidden" }, { status: 403 });
+    }
     if (error instanceof CooldownError) {
       return NextResponse.json(
         {

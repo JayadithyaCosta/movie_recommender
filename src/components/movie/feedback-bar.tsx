@@ -21,6 +21,8 @@ type FeedbackBarProps = {
    * the signal does).
    */
   onNotForMe?: () => void;
+  /** Called after 👁 Seen — same swap, but the replacement keeps the card's spirit (F-15). */
+  onSeen?: () => void;
 };
 
 const ICONS: Record<RatingSignal | "SAVE", (active: boolean) => React.ReactNode> = {
@@ -68,6 +70,7 @@ export function FeedbackBar({
   initialSaved,
   signedIn,
   onNotForMe,
+  onSeen,
 }: FeedbackBarProps) {
   const pathname = usePathname();
   const [signal, setSignal] = useState<Signal | null>(initialSignal);
@@ -78,6 +81,7 @@ export function FeedbackBar({
     const on = signal !== next;
     const previous = signal;
     if (on && next === "NOT_FOR_ME") onNotForMe?.();
+    if (on && next === "SEEN") onSeen?.();
     if (!signedIn) return;
 
     setSignal(on ? next : null);
@@ -94,7 +98,8 @@ export function FeedbackBar({
     <div role="group" aria-label={`Rate ${title}`} className="grid grid-cols-4 gap-1.5">
       {ACTIONS.map((action) => {
         const active = signal === action.signal;
-        const requiresLogin = !signedIn && !(action.signal === "NOT_FOR_ME" && onNotForMe);
+        const swaps = (action.signal === "NOT_FOR_ME" && onNotForMe) || (action.signal === "SEEN" && onSeen);
+        const requiresLogin = !signedIn && !swaps;
         const content = (
           <>
             {ICONS[action.signal](active)}

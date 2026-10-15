@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { RegenerateButton } from "@/components/movie/regenerate-button";
 import { ResultsList } from "@/components/movie/results-list";
 import { readAnonSessionIds } from "@/lib/anon-cookie";
 import { getViewerMovieStates } from "@/lib/feedback";
@@ -75,6 +76,8 @@ export default async function ResultsPage({ params }: Params) {
       />
 
       <footer className="mt-2 flex flex-col gap-3 px-2 sm:flex-row sm:justify-center">
+        {/* For You batches have their own Refresh (with its cooldown) on /for-you. */}
+        {canSwap && session.type !== "FOR_YOU" ? <RegenerateButton sessionId={session.id} /> : null}
         <Link
           href="/discover"
           className="min-h-tap flex items-center justify-center rounded-2xl bg-accent px-6 py-3 text-base font-semibold text-accent-foreground focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"

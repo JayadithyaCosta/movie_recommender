@@ -154,6 +154,8 @@ export const RecommendBody = z.discriminatedUnion("mode", [
   }),
   z.object({ mode: z.literal("FOR_YOU") }),
   z.object({ mode: z.literal("SURPRISE") }),
+  /** "None of these" — same brief as an earlier session, minus its five (F-15). */
+  z.object({ mode: z.literal("AGAIN"), sessionId: z.string().min(1).max(64) }),
 ]);
 
 export type RecommendBody = z.infer<typeof RecommendBody>;
@@ -183,4 +185,8 @@ export type FeedbackBody = z.infer<typeof FeedbackBody>;
 export const ReplaceBody = z.object({
   sessionId: z.string().min(1).max(64),
   rank: z.number().int().min(1).max(5),
+  /** Why the card goes: ✕ Nope steers away from it, 👁 Seen keeps its spirit (F-15). */
+  why: z.enum(["not_for_me", "seen"]).default("not_for_me"),
 });
+
+export type SwapReason = z.infer<typeof ReplaceBody>["why"];

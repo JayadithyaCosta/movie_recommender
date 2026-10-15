@@ -116,13 +116,19 @@ Previous summary (revise, don't restart from scratch): ${input.previousSummary |
 export function replacePrompt(input: {
   taste: string;
   rejected: string;
+  /** Seen = they liked the brief, just watched this one already. */
+  why: "not_for_me" | "seen";
   currentBatch: readonly string[];
   exclude: readonly string[];
 }): LlmPrompt {
   return {
     system: SYSTEM_SINGLE,
     user: `Their taste: ${input.taste}
-They rejected: "${input.rejected}" — avoid anything closely similar to it.
+${
+      input.why === "seen"
+        ? `They've already watched: "${input.rejected}" — suggest something else in the same spirit they likely haven't seen.`
+        : `They rejected: "${input.rejected}" — avoid anything closely similar to it.`
+    }
 Current batch (do not duplicate): ${list(input.currentBatch, "none")}
 EXCLUDE: ${list(input.exclude, "none")}`,
   };

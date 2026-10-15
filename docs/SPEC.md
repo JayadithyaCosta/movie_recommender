@@ -45,6 +45,8 @@ Each movie card shows three one-tap actions + save:
 - ❤️ LOVED, 👁 SEEN (already watched), ✕ NOT_FOR_ME → upsert `MovieFeedback`.
 - Bookmark → `SavedMovie` (watchlist, shown on profile) and also records a SAVED signal.
 - On NOT_FOR_ME in a For You batch: immediately call the **replace-one-pick** flow (Template D) to swap that slot; update the stored batch.
+- On SEEN (F-15): same swap, with Template D's "seen" line so the replacement keeps that pick's spirit. Owner / cookie-vouched viewer only, logged-out allowed.
+- "None of these? Get 5 new" (F-15, wizard/Surprise results): `POST /api/recommend {mode:"AGAIN", sessionId}` reruns the session's stored answers as a new session, current five excluded, shared path cache neither read nor written.
 
 ### 4.2 Taste profile (`lib/taste.ts`)
 

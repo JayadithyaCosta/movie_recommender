@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import type { ViewerMovieState } from "@/lib/feedback";
 import type { MovieView } from "@/lib/movie-view";
+import type { SwapReason } from "@/lib/schemas";
 
 import { FeedbackBar } from "./feedback-bar";
 import { MovieCard } from "./movie-card";
@@ -22,19 +23,19 @@ type ResultsListProps = {
   sessionId: string;
   picks: ListPick[];
   signedIn: boolean;
-  /** ✕ swaps the card in place (For You always; wizard results via F-14). */
+  /** ✕ Nope / 👁 Seen swap the card in place (For You always; wizard results via F-14). */
   canSwap: boolean;
 };
 
 /**
- * The five ranked cards with their actions. ✕ ("Nope") replaces just that
- * card — the rest of the batch stays put (SPEC §4.1).
+ * The five ranked cards with their actions. ✕ ("Nope") or 👁 ("Seen")
+ * replaces just that card — the rest of the batch stays put (SPEC §4.1).
  */
 export function ResultsList({ sessionId, picks: initial, signedIn, canSwap }: ResultsListProps) {
   const reduceMotion = useReducedMotion();
   const router = useRouter();
   const [picks, setPicks] = useState(initial);
-  const [swapping, setSwapping] = useState<Set<number>>(new Set());
+  const [swapping, setSwapping] = useState<Map<number, SwapReason>>(new Map());
   const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
@@ -44,13 +45,13 @@ export function ResultsList({ sessionId, picks: initial, signedIn, canSwap }: Re
   }, [toast]);
 
   const swap = useCallback(
-    async (rank: number) => {
-      setSwapping((current) => new Set(current).add(rank));
+    async (rank: number, why: SwapReason) => {
+      setSwapping((current) => new Map(current).set(rank, why));
       try {
         const response = await fetch("/api/recommend/replace", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sessionId, rank }),
+          body: JSON.stringify({ sessionId, rank, why }),
         });
         if (response.status === 429) {
           const data = (await response.json().catch(() => ({}))) as { message?: string };
@@ -68,7 +69,7 @@ export function ResultsList({ sessionId, picks: initial, signedIn, canSwap }: Re
         setToast("Couldn't find a replacement right now — try again in a moment.");
       } finally {
         setSwapping((current) => {
-          const copy = new Set(current);
+          const copy = new Map(current);
           copy.delete(rank);
           return copy;
         });
@@ -103,7 +104,8 @@ export function ResultsList({ sessionId, picks: initial, signedIn, canSwap }: Re
                       initialSignal={pick.state.signal}
                       initialSaved={pick.state.saved}
                       signedIn={signedIn}
-                      onNotForMe={canSwap ? () => void swap(pick.rank) : undefined}
+                      onNotForMe={canSwap ? () => void swap(pick.rank, "not_for_me") : undefined}
+                      onSeen={canSwap ? () => void swap(pick.rank, "seen") : undefined}
                     />
                   }
                 />
@@ -121,7 +123,9 @@ export function ResultsList({ sessionId, picks: initial, signedIn, canSwap }: Re
                   animate={reduceMotion ? undefined : { rotate: 360 }}
                   transition={{ duration: 0.9, repeat: Infinity, ease: "linear" }}
                 />
-                <span className="text-sm text-muted">Finding a better pick…</span>
+                <span className="text-sm text-muted">
+                  {swapping.get(pick.rank) === "seen" ? "Finding one you haven't seen…" : "Finding a better pick…"}
+                </span>
               </div>
             ) : null}
           </li>

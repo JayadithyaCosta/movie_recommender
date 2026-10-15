@@ -6,7 +6,7 @@ import { db } from "@/lib/db";
 import { buildAnonExclusions, buildExclusions, type Exclusions } from "@/lib/exclusions";
 import { getCandidates, getReplacementCandidate, LlmError, type LlmPrompt } from "@/lib/llm";
 import { forYouPrompt, replacePrompt, wizardPrompt } from "@/lib/prompts";
-import { StoredAnswersSchema, type Candidate } from "@/lib/schemas";
+import { StoredAnswersSchema, type Candidate, type SwapReason } from "@/lib/schemas";
 import { feedbackTitles, getTaste, type GenreWeights } from "@/lib/taste";
 import {
   discoverMovies,
@@ -284,12 +284,25 @@ function fallbackReason(answers: WizardAnswers): (movie: Movie, index: number) =
 
 export type RecommendResult = { sessionId: string; source: RecSource };
 
+type WizardOptions = {
+  /** Movies the viewer just turned down as a batch ("None of these", F-15). */
+  rejected?: readonly Movie[];
+};
+
 export async function recommendWizard(
   answers: WizardAnswers,
   viewer: Viewer,
+  options: WizardOptions = {},
 ): Promise<RecommendResult> {
-  const exclusions = await exclusionsFor(viewer);
-  const cacheable = viewer.userId === null && !answers.note;
+  const rejected = options.rejected ?? [];
+  const base = await exclusionsFor(viewer);
+  const exclusions: Exclusions = {
+    ids: new Set([...base.ids, ...rejected.map((movie) => movie.id)]),
+    titles: [...new Set([...base.titles, ...rejected.map((movie) => movie.title)])],
+  };
+  // A rejected batch may be the cached one, and its replacement shouldn't
+  // become the path's shared answer either.
+  const cacheable = viewer.userId === null && !answers.note && rejected.length === 0;
   const pathHash = cacheable ? pathHashOf(answers.byStep) : null;
 
   // 1. Shared cache — skipped if it would show this viewer something they've had.
@@ -356,6 +369,28 @@ export async function recommendSurprise(viewer: Viewer): Promise<RecommendResult
       "Surprise me — a varied mix across genres and decades: crowd-pleasers plus a hidden gem",
   };
   return recommendWizard(answers, viewer);
+}
+
+// ---------- None of these (F-15) ----------
+
+/**
+ * Re-runs an earlier wizard (or Surprise) session's brief as a brand-new
+ * session, with its five excluded. Owner / cookie-vouched creator only.
+ */
+export async function recommendAgain(sessionId: string, viewer: Viewer): Promise<RecommendResult> {
+  const session = await db.recSession.findUnique({
+    where: { id: sessionId },
+    include: { movies: { include: { movie: true } } },
+  });
+  if (!session || !ownsSession(session, viewer)) throw new NotAllowedError("Not your session");
+  if (session.type !== "WIZARD") throw new NotAllowedError("Only wizard sessions can be rerun");
+
+  const stored = StoredAnswersSchema.safeParse(session.answers);
+  if (!stored.success) throw new NotAllowedError("Session has no brief to rerun");
+  const { steps, byStep, readablePath, note } = stored.data;
+  const answers: WizardAnswers = { steps, byStep, readablePath, ...(note ? { note } : {}) };
+
+  return recommendWizard(answers, viewer, { rejected: session.movies.map((rec) => rec.movie) });
 }
 
 // ---------- For You ----------
@@ -456,6 +491,11 @@ export async function recommendForYou(userId: string): Promise<RecommendResult> 
 
 export class NotAllowedError extends Error {}
 
+/** Signed-in sessions belong to their user; anonymous ones to the cookie that made them. */
+function ownsSession(session: { id: string; userId: string | null }, viewer: Viewer): boolean {
+  return session.userId ? session.userId === viewer.userId : viewer.anonSessionIds.includes(session.id);
+}
+
 export type Replacement = { recId: string; rank: number; reason: string; movie: Movie };
 
 /**
@@ -463,17 +503,17 @@ export type Replacement = { recId: string; rank: number; reason: string; movie: 
  * For You batches and wizard results alike; anonymous viewers may swap only
  * sessions their own cookie vouches for.
  */
-export async function replacePick(sessionId: string, rank: number, viewer: Viewer): Promise<Replacement> {
+export async function replacePick(
+  sessionId: string,
+  rank: number,
+  viewer: Viewer,
+  why: SwapReason = "not_for_me",
+): Promise<Replacement> {
   const session = await db.recSession.findUnique({
     where: { id: sessionId },
     include: { movies: { orderBy: { rank: "asc" }, include: { movie: true } } },
   });
-  const owns =
-    session &&
-    (session.userId
-      ? session.userId === viewer.userId
-      : viewer.anonSessionIds.includes(session.id));
-  if (!session || !owns) throw new NotAllowedError("Not your session");
+  if (!session || !ownsSession(session, viewer)) throw new NotAllowedError("Not your session");
 
   const target = session.movies.find((rec) => rec.rank === rank);
   if (!target) throw new NotAllowedError("No pick at that rank");
@@ -497,6 +537,7 @@ export async function replacePick(sessionId: string, rank: number, viewer: Viewe
       replacePrompt({
         taste: tasteLine,
         rejected: target.movie.title,
+        why,
         currentBatch: session.movies.filter((rec) => rec.rank !== rank).map((rec) => rec.movie.title),
         exclude: exclusions.titles,
       }),
@@ -526,7 +567,7 @@ export async function replacePick(sessionId: string, rank: number, viewer: Viewe
       data: { movieId: pick.movie.id, reason: pick.reason },
     });
   });
-  console.log(`[recommend] swapped #${rank} "${target.movie.title}" → "${pick.movie.title}"`);
+  console.log(`[recommend] swapped (${why}) #${rank} "${target.movie.title}" → "${pick.movie.title}"`);
   return { recId: updated.id, rank, reason: pick.reason, movie: pick.movie };
 }
 

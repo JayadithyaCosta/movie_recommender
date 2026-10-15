@@ -138,3 +138,8 @@ Task-level tracking for the features in `docs/FEATURES.md`. Rules:
 - [x] ✕ swaps any results card in place (owner / cookie-vouched only)
 - [x] **Acceptance** (FEATURES F-14)
 
+## F-15 · Seen-swap & "None of these"
+
+- [x] 👁 Seen swaps the card in place (Template D "seen" variant, anon allowed)
+- [x] "None of these? Get 5 new" (`mode: "AGAIN"`, excludes current five, skips shared cache, owner only)
+- [x] **Acceptance** (FEATURES F-15)

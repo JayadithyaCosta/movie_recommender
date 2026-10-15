@@ -91,3 +91,10 @@ Three additions beyond the v1 spec that make getting a good set of five faster:
 (3) ✕ on *any* results card swaps that card in place (Template D), not just in For You — the session owner or the anonymous browser that created it only.
 **Done when:** each genre shows its sub-step; Surprise me lands on 5 verified cards (second anonymous call same day is a cache hit); ✕ on a wizard result swaps one card, and a non-owner gets 403.
 
+## F-15 · Seen-swap & "None of these"
+
+**Phase 5 · Depends on: F-14 · Spec: SPEC §4.1**
+(1) 👁 Seen on an owned results card swaps it in place like ✕ — Template D with a "seen" variant that keeps the card's spirit instead of steering away; works logged-out (the signal is stored only when signed in).
+(2) "None of these? Get 5 new" under wizard/Surprise results reruns the same brief as a new session (`mode: "AGAIN"`) with the current five excluded and the shared cache bypassed. For You keeps its own Refresh.
+**Done when:** Seen swaps one card (anon and signed-in); Get 5 new lands on 5 verified cards with none of the previous five; a non-owner gets 403; `make check` passes.
+

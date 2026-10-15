@@ -7,7 +7,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { ReplaceBody } from "@/lib/schemas";
 import { getViewer } from "@/lib/viewer";
 
-/** ✕ on a card → one fresh pick in that slot (Template D). */
+/** ✕ Nope or 👁 Seen on a card → one fresh pick in that slot (Template D). */
 export async function POST(request: Request) {
   const body = ReplaceBody.safeParse(await request.json().catch(() => null));
   if (!body.success) return NextResponse.json({ error: "bad_request" }, { status: 400 });
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const pick = await replacePick(body.data.sessionId, body.data.rank, viewer);
+    const pick = await replacePick(body.data.sessionId, body.data.rank, viewer, body.data.why);
     const state = (await getViewerMovieStates(viewer.userId, [pick.movie.id]))[pick.movie.id];
     return NextResponse.json({
       recId: pick.recId,
