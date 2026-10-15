@@ -33,8 +33,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {/* Desktop is a centered phone-width column (CLAUDE.md rule 5). */}
-        <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col">{children}</div>
+        {/* Each route group sets its own column width — see (app)/discover and (app)/(tabs). */}
+        <div className="flex min-h-dvh w-full flex-col">{children}</div>
       </body>
     </html>
   );

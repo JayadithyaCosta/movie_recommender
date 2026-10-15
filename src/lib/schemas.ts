@@ -157,3 +157,16 @@ export const RecommendBody = z.discriminatedUnion("mode", [
 ]);
 
 export type RecommendBody = z.infer<typeof RecommendBody>;
+
+// ---------- stored JSON (read back from our own DB) ----------
+
+/** `RecSession.answers` as written by `src/lib/recommend.ts`. */
+export const StoredAnswersSchema = z.object({
+  steps: z.array(z.object({ stepId: z.string(), optionId: z.string(), label: z.string() })),
+  byStep: z.record(z.string(), z.string()),
+  readablePath: z.string(),
+  note: z.string().optional(),
+  source: z.enum(["llm", "cache", "fallback"]).catch("llm"),
+});
+
+export type StoredAnswersShape = z.infer<typeof StoredAnswersSchema>;

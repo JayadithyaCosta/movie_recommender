@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="flex flex-1 flex-col justify-between px-6 pt-16 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-between px-6 pt-16 pb-6">
       <div className="space-y-4">
         <p className="text-muted text-sm tracking-[0.2em] uppercase">Movie Recs</p>
         <h1 className="text-4xl leading-tight font-semibold text-balance">

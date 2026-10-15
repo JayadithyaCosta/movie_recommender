@@ -14,11 +14,11 @@ async function main(): Promise<void> {
     STEP_TREE,
     [
       { stepId: "genre", optionId: "scifi" },
-      { stepId: "era", optionId: "90s-00s" },
+      { stepId: "era", optionId: process.env.SMOKE_ERA ?? "90s-00s" },
       { stepId: "pacing", optionId: "intense" },
     ],
     // A note keeps this run off the shared cache, so the pipeline really runs.
-    "smoke test",
+    process.env.SMOKE_NOTE ?? "smoke test",
   );
 
   const { sessionId, source } = await recommendWizard(answers, { userId: null, anonSessionIds: [] });

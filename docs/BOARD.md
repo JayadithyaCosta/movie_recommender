@@ -13,8 +13,8 @@ Task-level tracking for the features in `docs/FEATURES.md`. Rules:
 - [x] F-02 Mood wizard UI
 - [x] F-03 LLM provider abstraction
 - [x] F-04 TMDB integration & movie cache
-- [ ] F-05 Recommendation pipeline
-- [ ] F-06 Results & movie detail
+- [x] F-05 Recommendation pipeline
+- [x] F-06 Results & movie detail
 - [ ] F-07 Auth & session claiming
 - [ ] F-08 Profile page
 - [ ] F-09 Feedback signals
@@ -68,14 +68,14 @@ Task-level tracking for the features in `docs/FEATURES.md`. Rules:
 - [x] `POST /api/recommend`: LLM → TMDB resolve → backfill via /similar
 - [x] Persist `RecSession` + 5 ranked `Recommendation` rows
 - [x] Anonymous session cookie (signed) for later claiming
-- [ ] **Acceptance** (FEATURES F-05)
+- [x] **Acceptance** (FEATURES F-05)
 
 ## F-06 · Results & movie detail
 
-- [ ] `/results/[sessionId]` ranked cards (poster, meta, reason)
-- [ ] Movie detail view: overview, runtime, genres, watch providers + attribution
-- [ ] Revisit renders from DB (no recompute)
-- [ ] **Acceptance** (FEATURES F-06)
+- [x] `/results/[sessionId]` ranked cards (poster, meta, reason)
+- [x] Movie detail view: overview, runtime, genres, watch providers + attribution
+- [x] Revisit renders from DB (no recompute)
+- [x] **Acceptance** (FEATURES F-06)
 
 ## F-07 · Auth & session claiming
 

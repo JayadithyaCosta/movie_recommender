@@ -18,7 +18,6 @@ import {
  */
 
 const BASE_URL = "https://api.themoviedb.org/3";
-const IMAGE_BASE = "https://image.tmdb.org/t/p";
 const TIMEOUT_MS = 8_000;
 /** Below this, a search hit is usually a namesake short or a fan upload. */
 export const MIN_VOTE_COUNT = 50;
@@ -101,19 +100,7 @@ async function tmdbFetch<S extends z.ZodType>(
 
 // ---------- images ----------
 
-export type PosterSize = "w185" | "w342" | "w780";
-
-export function posterUrl(path: string | null | undefined, size: PosterSize = "w342"): string | null {
-  return path ? `${IMAGE_BASE}/${size}${path}` : null;
-}
-
-export function backdropUrl(path: string | null | undefined): string | null {
-  return path ? `${IMAGE_BASE}/w780${path}` : null;
-}
-
-export function logoUrl(path: string | null | undefined): string | null {
-  return path ? `${IMAGE_BASE}/w92${path}` : null;
-}
+export { backdropUrl, logoUrl, posterUrl, type PosterSize } from "@/lib/images";
 
 // ---------- movie cache ----------
 
