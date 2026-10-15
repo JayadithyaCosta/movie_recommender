@@ -79,9 +79,9 @@ Task-level tracking for the features in `docs/FEATURES.md`. Rules:
 
 ## F-07 · Auth & session claiming
 
-- [ ] Auth.js v5 + Prisma adapter; Google + Resend magic link
-- [ ] Login/logout UI usable at 390px
-- [ ] Anonymous session claiming on first login
+- [x] Auth.js v5 + Prisma adapter; Google + Resend magic link
+- [x] Login/logout UI usable at 390px
+- [x] Anonymous session claiming on first login
 - [ ] **Acceptance** (FEATURES F-07)
 
 ## F-08 · Profile page

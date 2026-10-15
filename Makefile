@@ -13,6 +13,10 @@ help: ## List available targets
 install: ## Install dependencies
 	$(PM) install
 
+.PHONY: add
+add: ## Add dependencies (PKG="a b", DEV=1 for devDependencies)
+	$(PM) add $(if $(DEV),-D,) $(PKG)
+
 .PHONY: dev
 dev: ## Run the Next.js dev server
 	$(PM) dev

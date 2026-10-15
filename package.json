@@ -17,10 +17,12 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
+    "@auth/prisma-adapter": "2.11.3",
     "@google/genai": "^2.15.0",
     "@prisma/client": "^6.19.1",
     "framer-motion": "^12.43.0",
     "next": "15.5.22",
+    "next-auth": "5.0.0-beta.32",
     "openai": "^7.3.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
